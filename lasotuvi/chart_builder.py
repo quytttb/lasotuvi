@@ -10,7 +10,7 @@ from lasotuvi.stem_branch import (
     five_element,
     HEAVENLY_STEMS,
     find_gu_shen,
-    find_element_bureau,
+    find_wu_xing_ju,
     find_fire_bell_positions,
     find_luu_tru,
     find_po_sui,
@@ -146,24 +146,24 @@ def build_earth_plate(day, month, year, birth_hour, gender, is_solar, timezone):
     year_branch_yin_yang = EARTHLY_BRANCHES[year_branch]["yin_yang"]
 
     # Bản Mệnh chính là Ngũ hành nạp âm của năm sinh
-    # natal_element_name = nayin_element(year_stem, year_branch)
+    # ben_ming_name = nayin_element(year_stem, year_branch)
 
-    bureau_element_id = find_element_bureau(plate.life_palace, year_stem)
-    cuc = five_element(bureau_element_id)
-    bureau = cuc["bureau"]
+    wu_xing_ju_element_id = find_wu_xing_ju(plate.life_palace, year_stem)
+    cuc = five_element(wu_xing_ju_element_id)
+    wu_xing_ju = cuc["wu_xing_ju"]
 
     # Nhập đại hạn khi đã biết được số cục
     # Theo sách Số tử vi dưới góc nhìn khoa học
     # Dương Nam - Âm Nữ theo chiều thuận
     # Âm Nam - Dương Nữ theo chiều nghịch
-    plate = plate.assign_major_periods(bureau, gender * year_branch_yin_yang)
+    plate = plate.assign_da_xian(wu_xing_ju, gender * year_branch_yin_yang)
 
     # Nhập tiểu hạn
-    annual_luck_start = shift_palace(11, -3 * (year_branch - 1))
-    plate = plate.assign_annual_luck(annual_luck_start, gender, year_branch)
+    xiao_xian_start = shift_palace(11, -3 * (year_branch - 1))
+    plate = plate.assign_xiao_xian(xiao_xian_start, gender, year_branch)
 
     # Bắt đầu an Tử vi tinh hệ
-    zi_wei_position = find_zi_wei_position(bureau, nn)
+    zi_wei_position = find_zi_wei_position(wu_xing_ju, nn)
     plate.place_stars(zi_wei_position, ZI_WEI)
 
     lian_zhen_position = shift_palace(zi_wei_position, 4)
@@ -290,7 +290,7 @@ def build_earth_plate(day, month, year, birth_hour, gender, is_solar, timezone):
     # **ISSUE 2**: Dương nam, Âm nữ theo chiều thuận, Âm nam Dương nữ theo
     # chiều nghịch
 
-    growth_start_position = find_growth_stage_start(bureau)
+    growth_start_position = find_growth_stage_start(wu_xing_ju)
     plate.place_stars(growth_start_position, ZHANG_SHENG)
 
     mu_yu_position = shift_palace(growth_start_position, gender_yin_yang * 1)

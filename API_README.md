@@ -10,7 +10,7 @@ LasoTuVi REST API for Zi Wei Dou Shu charts.
 | `gioi_tinh` / `duong_lich` / `nam_xem` | `gender` / `is_solar` / `view_year` |
 | `can_chi` / `dia_ban` / `thien_ban` | `stem_branch` / `earth_plate` / `chart_meta` |
 | `thap_nhi_cung` / `cung_sao` | `palaces` / `stars` |
-| `cung_menh` / `dac_tinh` | `life_palace` / `brightness` |
+| `cung_menh` / `dac_tinh` | `life_palace` / `miao_wang` |
 | `GET /info/sao` | `GET /info/stars` |
 | `POST /calendar/can-chi` | `POST /calendar/stem-branch` |
 

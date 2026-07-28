@@ -12,7 +12,7 @@ from lasotuvi.stem_branch import (
     nayin_element,
     generation_control,
     HEAVENLY_STEMS,
-    find_element_bureau,
+    find_wu_xing_ju,
 )
 from lasotuvi.lunar_calendar import julian_day_from_date
 
@@ -80,26 +80,26 @@ class HeavenPlate:
         else:
             self.life_yin_yang_status = "Âm dương nghịch lý"
 
-        bureau_key = find_element_bureau(earth_plate.life_palace, self.year_stem)
-        self.bureau_element_id = five_element(bureau_key)["id"]
-        self.bureau_name = five_element(bureau_key)["bureau_name"]
+        wu_xing_ju_key = find_wu_xing_ju(earth_plate.life_palace, self.year_stem)
+        self.wu_xing_ju_element_id = five_element(wu_xing_ju_key)["id"]
+        self.wu_xing_ju_name = five_element(wu_xing_ju_key)["wu_xing_ju_name"]
 
         # Prefer traditional: life master by life-palace branch; body master by year branch
-        self.life_master = EARTHLY_BRANCHES[earth_plate.life_palace]["life_master"]
-        self.body_master = EARTHLY_BRANCHES[self.year_branch]["body_master"]
+        self.ming_zhu = EARTHLY_BRANCHES[earth_plate.life_palace]["ming_zhu"]
+        self.shen_zhu = EARTHLY_BRANCHES[self.year_branch]["shen_zhu"]
 
         self.nayin = nayin_element(self.year_branch, self.year_stem)
-        natal_element_id = five_element(self.nayin)["id"]
-        relation = generation_control(natal_element_id, self.bureau_element_id)
+        ben_ming_element_id = five_element(self.nayin)["id"]
+        relation = generation_control(ben_ming_element_id, self.wu_xing_ju_element_id)
         if relation == 1:
-            self.generation_control_status = "Bản Mệnh sinh Cục"
+            self.sheng_ke_status = "Bản Mệnh sinh Cục"
         elif relation == -1:
-            self.generation_control_status = "Bản Mệnh khắc Cục"
+            self.sheng_ke_status = "Bản Mệnh khắc Cục"
         elif relation == -1j:
-            self.generation_control_status = "Cục khắc Bản Mệnh"
+            self.sheng_ke_status = "Cục khắc Bản Mệnh"
         elif relation == 1j:
-            self.generation_control_status = "Cục sinh Bản mệnh"
+            self.sheng_ke_status = "Cục sinh Bản mệnh"
         else:
-            self.generation_control_status = "Cục hòa Bản Mệnh"
+            self.sheng_ke_status = "Cục hòa Bản Mệnh"
 
-        self.natal_element_name = nayin_element(self.year_branch, self.year_stem, True)
+        self.ben_ming_name = nayin_element(self.year_branch, self.year_stem, True)

@@ -98,7 +98,7 @@ class TestChartGeneration:
             assert "index" in palace
             assert "branch_name" in palace
             assert "stars" in palace
-            assert "monthly_luck" in palace
+            assert "yue_xian" in palace
 
     def test_generate_full_chart(self, birth):
         response = client.post("/chart/generate", json=birth)
@@ -106,7 +106,7 @@ class TestChartGeneration:
         data = response.json()
         assert data["birth_info"]["name"] == "Test User"
         assert data["stem_branch"]["year"]["label"]
-        assert data["chart_meta"]["life_master"]
+        assert data["chart_meta"]["ming_zhu"]
         assert data["chart_meta"]["view_year"] == 2026
         assert "formations" in data
         assert "formations" in data["earth_plate"]
@@ -145,4 +145,4 @@ class TestInfoEndpoints:
         assert response.status_code == 200
         data = response.json()
         assert data["total"] >= 100
-        assert "brightness" in data
+        assert "miao_wang" in data

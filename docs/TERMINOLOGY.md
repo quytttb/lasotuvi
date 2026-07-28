@@ -292,3 +292,23 @@ API: `formations` trên chart / earth plate; `interpretations[]` trên mỗi pal
 | Knowledge base luận đoán | `lasotuvi/data/interpretations.json` |
 
 Chi tiết rename file/hàm: [NAMING.md](./NAMING.md).
+
+## 13. Ánh xạ sang tên code (Pinyin + structural English)
+
+| Khái niệm domain | Identifier |
+|---|---|
+| Cung | `palace` |
+| Sao | `star` / constants `ZI_WEI`, `TAI_YANG`, … |
+| Địa bàn / Thiên bàn | `earth_plate` / `heaven_plate` / `chart_meta` |
+| Cung Mệnh / Thân | `life_palace` / `body_palace` |
+| Ngũ hành cục | `wu_xing_ju` / `wu_xing_ju_name` |
+| Đại / tiểu / nguyệt hạn | `da_xian_age` / `xiao_xian_branch` / `yue_xian` |
+| Miếu Vượng Đắc Bình Hãm | `miao_wang` |
+| Mệnh chủ / Thân chủ | `ming_zhu` / `shen_zhu` |
+| Bản mệnh / Nạp âm | `ben_ming_name` / `nayin` |
+| Sinh khắc | `sheng_ke_status` |
+| Trường sinh | `is_chang_sheng` |
+| Can Chi | `stem_branch` / `HEAVENLY_STEMS` / `EARTHLY_BRANCHES` |
+| Âm dương / Ngũ hành | `yin_yang` / `five_element` |
+
+Chi tiết: [NAMING.md](./NAMING.md).

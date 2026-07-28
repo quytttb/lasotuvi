@@ -4,7 +4,7 @@ Test suite for DiaBan module - Địa bàn calculations
 
 import pytest
 
-from lasotuvi.earth_plate import EarthPlate, Palace, apply_star_brightness
+from lasotuvi.earth_plate import EarthPlate, Palace, apply_star_miao_wang
 
 
 class TestCungDiaBan:
@@ -129,13 +129,13 @@ class TestDiaBan:
         db = EarthPlate(8, 1)
         am_duong_cung = 1  # Giả sử cung là dương
 
-        db = db.assign_major_periods(cuc, gioi_tinh * am_duong_cung)
+        db = db.assign_da_xian(cuc, gioi_tinh * am_duong_cung)
 
         # Kiểm tra mỗi cung có đại hạn
         for i in range(1, 13):
-            assert hasattr(db.palaces[i], "major_period_age")
-            assert isinstance(db.palaces[i].major_period_age, int)
-            assert db.palaces[i].major_period_age > 0
+            assert hasattr(db.palaces[i], "da_xian_age")
+            assert isinstance(db.palaces[i].da_xian_age, int)
+            assert db.palaces[i].da_xian_age > 0
 
     @pytest.mark.parametrize(
         "chi_nam,gioi_tinh",
@@ -148,28 +148,28 @@ class TestDiaBan:
     def test_nhap_tieu_han(self, chi_nam, gioi_tinh):
         """Test nhập tiểu hạn"""
         db = EarthPlate(8, 1)
-        db = db.assign_annual_luck(db.life_palace, gioi_tinh, chi_nam)
+        db = db.assign_xiao_xian(db.life_palace, gioi_tinh, chi_nam)
 
         # Kiểm tra mỗi cung có tiểu hạn
         for i in range(1, 13):
-            assert hasattr(db.palaces[i], "annual_luck_branch")
+            assert hasattr(db.palaces[i], "xiao_xian_branch")
 
 
 class TestDacTinhSao:
     """Test đặc tính sao (Vượng, Miếu, Đắc, Bình, Hãm)"""
 
     def test_dac_tinh_sao_exists(self):
-        """Test hàm apply_star_brightness tồn tại và hoạt động"""
+        """Test hàm apply_star_miao_wang tồn tại và hoạt động"""
         from lasotuvi.stars import Star, ZI_WEI
 
         # Tạo bản sao sao Tử Vi để test
         sao_test = Star(ZI_WEI.star_id, ZI_WEI.name, ZI_WEI.element)
 
         # Tử Vi ở cung Tý (1)
-        apply_star_brightness(1, sao_test)
+        apply_star_miao_wang(1, sao_test)
 
-        # Kiểm tra sao có thuộc tính brightness
-        assert hasattr(sao_test, "brightness")
+        # Kiểm tra sao có thuộc tính miao_wang
+        assert hasattr(sao_test, "miao_wang")
 
     @pytest.mark.parametrize("cung_so", range(1, 13))
     def test_dac_tinh_all_cungs(self, cung_so):
@@ -179,10 +179,10 @@ class TestDacTinhSao:
         # Tạo bản sao sao Tử Vi để test
         sao_test = Star(ZI_WEI.star_id, ZI_WEI.name, ZI_WEI.element)
 
-        apply_star_brightness(cung_so, sao_test)
+        apply_star_miao_wang(cung_so, sao_test)
 
-        # Kiểm tra có thuộc tính brightness
-        assert hasattr(sao_test, "brightness")
+        # Kiểm tra có thuộc tính miao_wang
+        assert hasattr(sao_test, "miao_wang")
 
 
 class TestIntegration:

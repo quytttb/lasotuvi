@@ -5,7 +5,7 @@ from typing import Any, Literal, Optional
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
-BRIGHTNESS_LABELS = {
+MIAO_WANG_LABELS = {
     "M": "Miếu",
     "V": "Vượng",
     "Đ": "Đắc",
@@ -128,11 +128,11 @@ class StarInfo(BaseModel):
     element: Optional[str] = None
     category: Optional[int] = None
     category_label: Optional[str] = None
-    brightness: Optional[str] = None
-    brightness_label: Optional[str] = None
+    miao_wang: Optional[str] = None
+    miao_wang_label: Optional[str] = None
     direction: Optional[str] = None
     yin_yang: Optional[Any] = None
-    is_growth_cycle: bool = False
+    is_chang_sheng: bool = False
     is_auspicious: Optional[bool] = None
     palace_position: Optional[int] = None
 
@@ -162,24 +162,24 @@ class PalaceInfo(BaseModel):
     stem_name: Optional[str] = None
     stars: list[StarInfo] = []
     interpretations: list[StarInterpretation] = []
-    major_period_age: Optional[int] = None
-    annual_luck_branch: Optional[str] = None
-    monthly_luck: Optional[int] = None
+    da_xian_age: Optional[int] = None
+    xiao_xian_branch: Optional[str] = None
+    yue_xian: Optional[int] = None
     is_body_palace: bool = False
     is_xun: bool = False
     is_triet: bool = False
 
 
 class ChartMeta(BaseModel):
-    natal_element_name: Optional[str] = None
+    ben_ming_name: Optional[str] = None
     nayin: Optional[str] = None
     year_yin_yang: Optional[str] = None
     life_yin_yang_status: Optional[str] = None
-    life_master: Optional[str] = None
-    body_master: Optional[str] = None
-    generation_control_status: Optional[str] = None
-    bureau_name: Optional[str] = None
-    bureau: Optional[int] = None
+    ming_zhu: Optional[str] = None
+    shen_zhu: Optional[str] = None
+    sheng_ke_status: Optional[str] = None
+    wu_xing_ju_name: Optional[str] = None
+    wu_xing_ju: Optional[int] = None
     view_year: Optional[int] = None
     view_year_branch: Optional[str] = None
 
@@ -189,8 +189,8 @@ class EarthPlateResponse(BaseModel):
     lunar_birth_hour: int
     life_palace: int
     body_palace: int
-    bureau: int
-    bureau_name: str
+    wu_xing_ju: int
+    wu_xing_ju_name: str
     palaces: list[PalaceInfo]
     formations: list[ChartFormation] = []
     chart_meta: Optional[ChartMeta] = None
@@ -262,7 +262,7 @@ class StarCatalogItem(BaseModel):
     category_label: Optional[str] = None
     direction: Optional[str] = None
     yin_yang: Optional[Any] = None
-    is_growth_cycle: bool = False
+    is_chang_sheng: bool = False
     description: Optional[str] = None
     meaning: Optional[str] = None
 
@@ -270,5 +270,5 @@ class StarCatalogItem(BaseModel):
 class StarCatalogResponse(BaseModel):
     total: int
     items: list[StarCatalogItem]
-    brightness: dict[str, str] = BRIGHTNESS_LABELS
+    miao_wang: dict[str, str] = MIAO_WANG_LABELS
     category_labels: dict[int, str] = STAR_CATEGORY_LABELS

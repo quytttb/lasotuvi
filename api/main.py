@@ -41,7 +41,7 @@ Breaking v2 schema: English field names throughout.
 ### Features
 * Solar ↔ lunar calendar conversion
 * Full stem–branch (year / month / day / hour)
-* Complete earth plate with structured stars (brightness, category)
+* Complete earth plate with structured stars (miao_wang, category)
 * Chart formations (cách cục) and palace star interpretations
 * Chart meta: natal element, life/body masters, generation/control
 * Monthly luck via `view_year`
@@ -260,8 +260,8 @@ async def get_elements_info():
                 "id": elem["id"],
                 "key": key,
                 "name": elem["element_name"],
-                "bureau": elem["bureau"],
-                "bureau_name": elem["bureau_name"],
+                "wu_xing_ju": elem["wu_xing_ju"],
+                "wu_xing_ju_name": elem["wu_xing_ju_name"],
             }
         )
     return {
@@ -304,8 +304,8 @@ async def get_stem_branch_info():
             {
                 "id": i,
                 "name": chi["branch_name"],
-                "life_master": chi.get("life_master"),
-                "body_master": chi.get("body_master"),
+                "ming_zhu": chi.get("ming_zhu"),
+                "shen_zhu": chi.get("shen_zhu"),
                 "element": chi.get("element_name"),
             }
         )
@@ -331,7 +331,7 @@ async def get_stats():
             "Solar ↔ Lunar conversion",
             "Full stem–branch",
             "Earth plate + chart meta",
-            "Structured stars + brightness",
+            "Structured stars + miao_wang",
             "Chart formations + palace interpretations",
             "Monthly luck via view_year",
             "Star catalog",

@@ -19,12 +19,12 @@ class Star:
             15: Hình tinh
         direction (str, optional): Bắc Đẩu tinh, Nam Bắc Đẩu tinh
         yin_yang (str, optional): Âm Dương của sao
-        is_growth_cycle (int, optional): 0/None: Không thuộc vòng Tràng sinh
+        is_chang_sheng (int, optional): 0/None: Không thuộc vòng Tràng sinh
                                         1: Thuộc vòng Tràng sinh
     """
 
     def __init__(
-        self, star_id, name, element, category=2, direction="", yin_yang="", is_growth_cycle=0
+        self, star_id, name, element, category=2, direction="", yin_yang="", is_chang_sheng=0
     ):
         super().__init__()
         self.star_id = star_id
@@ -33,18 +33,18 @@ class Star:
         self.category = category
         self.direction = direction
         self.yin_yang = yin_yang
-        self.is_growth_cycle = is_growth_cycle
+        self.is_chang_sheng = is_chang_sheng
         self.element_css = five_element(element)["css"]
-        self.brightness = None
+        self.miao_wang = None
 
-    def set_brightness(self, dacTinh):
+    def set_miao_wang(self, dacTinh):
         """An Đặc tính cho sao: V, M, Đ, B, H
-        Args: brightness (str): Đặc tính của sao, Vượng (V), Miếu (M),
+        Args: miao_wang (str): Đặc tính của sao, Vượng (V), Miếu (M),
                                 Đắc (Đ), Bình (B), Hãm (H)
         Returns:
             object: self
         """
-        self.brightness = dacTinh
+        self.miao_wang = dacTinh
         # self.name += " (%s)" % dacTinh
         # self.element_css = dt[dacTinh]
         return self
@@ -112,18 +112,18 @@ FU_BING = Star(37, "Phục binh", "H", 13)
 GUAN_FU_2 = Star(38, "Quan phù", "H", 12)
 
 # Vòng Tràng sinh
-ZHANG_SHENG = Star(39, "Tràng sinh", "T", 5, is_growth_cycle=1)
-MU_YU = Star(40, "Mộc dục", "T", 14, is_growth_cycle=1)
-GUAN_DAI = Star(41, "Quan đới", "K", 4, is_growth_cycle=1)
-LIN_GUAN = Star(42, "Lâm quan", "K", 7, is_growth_cycle=1)
-DI_WANG = Star(43, "Đế vượng", "K", 5, is_growth_cycle=1)
-SHUAI = Star(44, "Suy", "T", 12, is_growth_cycle=1)
-BING = Star(45, "Bệnh", "H", 12, is_growth_cycle=1)
-SI_STAR = Star(46, "Tử", "H", 12, is_growth_cycle=1)
-MU = Star(47, "Mộ", "O", is_growth_cycle=1)
-JUE = Star(48, "Tuyệt", "O", 12, is_growth_cycle=1)
-TAI = Star(49, "Thai", "O", 14, is_growth_cycle=1)
-YANG_STAR = Star(50, "Dưỡng", "M", 2, is_growth_cycle=1)
+ZHANG_SHENG = Star(39, "Tràng sinh", "T", 5, is_chang_sheng=1)
+MU_YU = Star(40, "Mộc dục", "T", 14, is_chang_sheng=1)
+GUAN_DAI = Star(41, "Quan đới", "K", 4, is_chang_sheng=1)
+LIN_GUAN = Star(42, "Lâm quan", "K", 7, is_chang_sheng=1)
+DI_WANG = Star(43, "Đế vượng", "K", 5, is_chang_sheng=1)
+SHUAI = Star(44, "Suy", "T", 12, is_chang_sheng=1)
+BING = Star(45, "Bệnh", "H", 12, is_chang_sheng=1)
+SI_STAR = Star(46, "Tử", "H", 12, is_chang_sheng=1)
+MU = Star(47, "Mộ", "O", is_chang_sheng=1)
+JUE = Star(48, "Tuyệt", "O", 12, is_chang_sheng=1)
+TAI = Star(49, "Thai", "O", 14, is_chang_sheng=1)
+YANG_STAR = Star(50, "Dưỡng", "M", 2, is_chang_sheng=1)
 
 # Lục sát
 #    Kình dương đà la

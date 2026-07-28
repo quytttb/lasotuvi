@@ -12,5 +12,5 @@ class TestThienBan(unittest.TestCase):
         plate = build_earth_plate(24, 10, 1991, 7, 1, True, 7)
         heaven = HeavenPlate(24, 10, 1991, 7, 1, "asdf", plate)
         assert heaven is not None
-        assert heaven.bureau_name
-        assert heaven.life_master
+        assert heaven.wu_xing_ju_name
+        assert heaven.ming_zhu

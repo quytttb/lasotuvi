@@ -16,12 +16,12 @@ heaven = HeavenPlate(day, month, year, hour, gender, name, plate, is_solar, time
 print(f"Name: {name}")
 print(f"Life palace: {plate.life_palace} ({plate.palaces[plate.life_palace].palace_name})")
 print(f"Body palace: {plate.body_palace}")
-print(f"Bureau: {heaven.bureau_name}")
-print(f"Life master: {heaven.life_master}")
-print(f"Body master: {heaven.body_master}")
-print(f"Natal element: {heaven.natal_element_name}")
-print(f"Relation: {heaven.generation_control_status}")
+print(f"Bureau: {heaven.wu_xing_ju_name}")
+print(f"Life master: {heaven.ming_zhu}")
+print(f"Body master: {heaven.shen_zhu}")
+print(f"Natal element: {heaven.ben_ming_name}")
+print(f"Relation: {heaven.sheng_ke_status}")
 print("\nStars in Life palace:")
 for star in plate.palaces[plate.life_palace].stars:
-    bright = f" ({star.get('brightness')})" if star.get("brightness") else ""
+    bright = f" ({star.get('miao_wang')})" if star.get("miao_wang") else ""
     print(f"  - {star['name']}{bright}")

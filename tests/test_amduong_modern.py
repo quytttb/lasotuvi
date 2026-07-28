@@ -11,7 +11,7 @@ from lasotuvi.stem_branch import (
     five_element,
     generation_control,
     find_gu_shen,
-    find_element_bureau,
+    find_wu_xing_ju,
     find_fire_bell_positions,
     find_po_sui,
     find_tian_kui,
@@ -134,7 +134,7 @@ class TestTimCuc:
     )
     def test_tim_cuc(self, cung_menh, can_nam, expected_cuc_range):
         """Test tìm cục"""
-        result = find_element_bureau(cung_menh, can_nam)
+        result = find_wu_xing_ju(cung_menh, can_nam)
         # Kết quả là tên Ngũ Hành, cần parse ra số cục
         assert result is not None, "Should return a cuc"
 

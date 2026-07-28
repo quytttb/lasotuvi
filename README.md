@@ -6,11 +6,11 @@ This repository is maintained independently (not synced with abandoned upstream 
 
 ## Features
 
-- Full star placement: 12 palaces, major/minor stars, brightness (Miao/Wang/…)
+- Full star placement: 12 palaces, major/minor stars, miao_wang (Miao/Wang/…)
 - Solar ↔ lunar conversion, full stem–branch (year/month/day/hour)
 - REST API v2 (**English JSON keys**, breaking)
 - Chart formations (cách cục) and palace star interpretations
-- Client-friendly star fields: `brightness`, `category_label`, `is_auspicious`
+- Client-friendly star fields: `miao_wang`, `category_label`, `is_auspicious`
 - Monthly luck via `view_year`
 - Star catalog: `GET /info/stars`
 - Modern pytest suite

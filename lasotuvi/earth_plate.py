@@ -31,13 +31,13 @@ class Palace:
         self.branch_name = EARTHLY_BRANCHES[self.index]["branch_name"]
         self.is_body_palace = False
         self.palace_name: str | None = None
-        self.major_period_age: int | None = None
-        self.annual_luck_branch: str | None = None
+        self.da_xian_age: int | None = None
+        self.xiao_xian_branch: str | None = None
         self.is_xun = False
         self.is_triet = False
 
     def add_star(self, star):
-        apply_star_brightness(self.index, star)
+        apply_star_miao_wang(self.index, star)
         self.stars.append(star.__dict__)
         return self
 
@@ -45,12 +45,12 @@ class Palace:
         self.palace_name = palace_name
         return self
 
-    def set_major_period(self, age: int):
-        self.major_period_age = age
+    def set_da_xian(self, age: int):
+        self.da_xian_age = age
         return self
 
-    def set_annual_luck(self, offset: int):
-        self.annual_luck_branch = EARTHLY_BRANCHES[offset + 1]["branch_name"]
+    def set_xiao_xian(self, offset: int):
+        self.xiao_xian_branch = EARTHLY_BRANCHES[offset + 1]["branch_name"]
         return self
 
     def mark_body_palace(self):
@@ -109,17 +109,17 @@ class EarthPlate:
             self.palaces[item["palace_index"]].set_palace_name(item["palace_name"])
         return self
 
-    def assign_major_periods(self, bureau: int, gender: int):
+    def assign_da_xian(self, wu_xing_ju: int, gender: int):
         for palace in self.palaces:
             distance = palace_distance(palace.index, self.life_palace, gender)
-            palace.set_major_period(bureau + distance * 10)
+            palace.set_da_xian(wu_xing_ju + distance * 10)
         return self
 
-    def assign_annual_luck(self, annual_luck_start: int, gender: int, year_branch: int):
-        zi_palace_ref = shift_palace(annual_luck_start, -gender * (year_branch - 1))
+    def assign_xiao_xian(self, xiao_xian_start: int, gender: int, year_branch: int):
+        zi_palace_ref = shift_palace(xiao_xian_start, -gender * (year_branch - 1))
         for palace in self.palaces:
             distance = palace_distance(palace.index, zi_palace_ref, gender)
-            palace.set_annual_luck(distance)
+            palace.set_xiao_xian(distance)
         return self
 
     def assign_body_palace_flag(self):
@@ -159,8 +159,8 @@ class EarthPlate:
         }
 
 
-def apply_star_brightness(palace_index: int, star) -> None:
-    brightness_matrix = {
+def apply_star_miao_wang(palace_index: int, star) -> None:
+    miao_wang_matrix = {
         1: ["Tử vi", "B", "Đ", "M", "B", "V", "M", "M", "Đ", "M", "B", "V", "B"],
         2: ["Liêm trinh", "V", "Đ", "V", "H", "M", "H", "V", "Đ", "V", "H", "M", "H"],
         3: ["Thiên đồng", "V", "H", "M", "Đ", "H", "Đ", "H", "H", "M", "H", "H", "Đ"],
@@ -191,7 +191,7 @@ def apply_star_brightness(palace_index: int, star) -> None:
         73: ["Thiên Hình", None, None, "Đ", "Đ", None, None, None, None, "Đ", "Đ", None, None],
         74: ["Thiên riêu", None, None, "Đ", "Đ", None, None, None, None, None, "Đ", "Đ", None],
     }
-    if star.star_id in brightness_matrix:
-        level = brightness_matrix[star.star_id][palace_index]
+    if star.star_id in miao_wang_matrix:
+        level = miao_wang_matrix[star.star_id][palace_index]
         if level in ["M", "V", "Đ", "B", "H"]:
-            star.set_brightness(level)
+            star.set_miao_wang(level)

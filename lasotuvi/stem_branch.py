@@ -113,96 +113,96 @@ EARTHLY_BRANCHES = [
         "id": 1,
         "branch_name": "Tý",
         "element_name": "T",
-        "life_master": "Tham lang",
-        "body_master": "Linh tinh",
+        "ming_zhu": "Tham lang",
+        "shen_zhu": "Linh tinh",
         "yin_yang": 1,
     },
     {
         "id": 2,
         "branch_name": "Sửu",
         "element_name": "O",
-        "life_master": "Cự môn",
-        "body_master": "Thiên tướng",
+        "ming_zhu": "Cự môn",
+        "shen_zhu": "Thiên tướng",
         "yin_yang": -1,
     },
     {
         "id": 3,
         "branch_name": "Dần",
         "element_name": "M",
-        "life_master": "Lộc tồn",
-        "body_master": "Thiên lương",
+        "ming_zhu": "Lộc tồn",
+        "shen_zhu": "Thiên lương",
         "yin_yang": 1,
     },
     {
         "id": 4,
         "branch_name": "Mão",
         "element_name": "M",
-        "life_master": "Văn khúc",
-        "body_master": "Thiên đồng",
+        "ming_zhu": "Văn khúc",
+        "shen_zhu": "Thiên đồng",
         "yin_yang": -1,
     },
     {
         "id": 5,
         "branch_name": "Thìn",
         "element_name": "O",
-        "life_master": "Liêm trinh",
-        "body_master": "Văn xương",
+        "ming_zhu": "Liêm trinh",
+        "shen_zhu": "Văn xương",
         "yin_yang": 1,
     },
     {
         "id": 6,
         "branch_name": "Tỵ",
         "element_name": "H",
-        "life_master": "Vũ khúc",
-        "body_master": "Thiên cơ",
+        "ming_zhu": "Vũ khúc",
+        "shen_zhu": "Thiên cơ",
         "yin_yang": -1,
     },
     {
         "id": 7,
         "branch_name": "Ngọ",
         "element_name": "H",
-        "life_master": "Phá quân",
-        "body_master": "Hỏa tinh",
+        "ming_zhu": "Phá quân",
+        "shen_zhu": "Hỏa tinh",
         "yin_yang": 1,
     },
     {
         "id": 8,
         "branch_name": "Mùi",
         "element_name": "O",
-        "life_master": "Vũ khúc",
-        "body_master": "Thiên tướng",
+        "ming_zhu": "Vũ khúc",
+        "shen_zhu": "Thiên tướng",
         "yin_yang": -1,
     },
     {
         "id": 9,
         "branch_name": "Thân",
         "element_name": "K",
-        "life_master": "Liêm trinh",
-        "body_master": "Thiên lương",
+        "ming_zhu": "Liêm trinh",
+        "shen_zhu": "Thiên lương",
         "yin_yang": 1,
     },
     {
         "id": 10,
         "branch_name": "Dậu",
         "element_name": "K",
-        "life_master": "Văn khúc",
-        "body_master": "Thiên đồng",
+        "ming_zhu": "Văn khúc",
+        "shen_zhu": "Thiên đồng",
         "yin_yang": -1,
     },
     {
         "id": 11,
         "branch_name": "Tuất",
         "element_name": "O",
-        "life_master": "Lộc tồn",
-        "body_master": "Văn xương",
+        "ming_zhu": "Lộc tồn",
+        "shen_zhu": "Văn xương",
         "yin_yang": 1,
     },
     {
         "id": 12,
         "branch_name": "Hợi",
         "element_name": "T",
-        "life_master": "Cự môn",
-        "body_master": "Thiên cơ",
+        "ming_zhu": "Cự môn",
+        "shen_zhu": "Thiên cơ",
         "yin_yang": -1,
     },
 ]
@@ -326,15 +326,15 @@ def five_element(element_name):
         Exception: Description
     """
     if element_name in ["Kim", "K"]:
-        return {"id": 1, "element_name": "Kim", "bureau": 4, "bureau_name": "Kim tứ Cục", "css": "hanhKim"}
+        return {"id": 1, "element_name": "Kim", "wu_xing_ju": 4, "wu_xing_ju_name": "Kim tứ Cục", "css": "hanhKim"}
     elif element_name == "Moc" or element_name == "M":
-        return {"id": 2, "element_name": "Mộc", "bureau": 3, "bureau_name": "Mộc tam Cục", "css": "hanhMoc"}
+        return {"id": 2, "element_name": "Mộc", "wu_xing_ju": 3, "wu_xing_ju_name": "Mộc tam Cục", "css": "hanhMoc"}
     elif element_name == "Thuy" or element_name == "T":
-        return {"id": 3, "element_name": "Thủy", "bureau": 2, "bureau_name": "Thủy nhị Cục", "css": "hanhThuy"}
+        return {"id": 3, "element_name": "Thủy", "wu_xing_ju": 2, "wu_xing_ju_name": "Thủy nhị Cục", "css": "hanhThuy"}
     elif element_name == "Hoa" or element_name == "H":
-        return {"id": 4, "element_name": "Hỏa", "bureau": 6, "bureau_name": "Hỏa lục Cục", "css": "hanhHoa"}
+        return {"id": 4, "element_name": "Hỏa", "wu_xing_ju": 6, "wu_xing_ju_name": "Hỏa lục Cục", "css": "hanhHoa"}
     elif element_name == "Tho" or element_name == "O":
-        return {"id": 5, "element_name": "Thổ", "bureau": 5, "bureau_name": "Thổ ngũ Cục", "css": "hanhTho"}
+        return {"id": 5, "element_name": "Thổ", "wu_xing_ju": 5, "wu_xing_ju_name": "Thổ ngũ Cục", "css": "hanhTho"}
     else:
         raise Exception(
             "Tên Hành phải thuộc Kim (K), Mộc (M), Thủy (T), \
@@ -372,7 +372,7 @@ def nayin_element(branch: int, stem: int, as_natal_name=False):
     Returns:
         Trả về chữ viết tắt Hành của năm (K, T, H, O, M)
     """
-    natal_element_name = {
+    ben_ming_name = {
         "K1": "HẢI TRUNG KIM",
         "T1": "GIÁNG HẠ THỦY",
         "H1": "TÍCH LỊCH HỎA",
@@ -423,7 +423,7 @@ def nayin_element(branch: int, stem: int, as_natal_name=False):
         nh = matranNapAm[branch][stem]
         if nh[0] in ["K", "M", "T", "H", "O"]:
             if as_natal_name is True:
-                return natal_element_name[nh]
+                return ben_ming_name[nh]
             else:
                 return nh[0]
     except (KeyError, IndexError) as e:
@@ -468,7 +468,7 @@ def palace_distance(cung1, cung2, chieu=1):
         return (cung2 - cung1 + 12) % 12
 
 
-def find_element_bureau(life_palace_index, birth_year_stem):
+def find_wu_xing_ju(life_palace_index, birth_year_stem):
     """Tìm Cục (Ngũ Hành Cục) theo cung Mệnh và Can năm sinh.
 
     Theo tài liệu Tử Vi:
@@ -520,11 +520,11 @@ def find_zi_wei_position(cuc, ngaySinhAmLich):
         Exception: Nếu cục không hợp lệ
     """
     cungDan = 3  # Vị trí cung Dần ban đầu là 3
-    initial_bureau = cuc
+    initial_wu_xing_ju = cuc
     if cuc not in [2, 3, 4, 5, 6]:  # Tránh trường hợp infinite loop
         raise Exception("Số cục phải là 2, 3, 4, 5, 6")
     while cuc < ngaySinhAmLich:
-        cuc += initial_bureau
+        cuc += initial_wu_xing_ju
         cungDan += 1  # Dịch vị trí cung Dần
     saiLech = cuc - ngaySinhAmLich
     if saiLech % 2 == 1:  # Sửa 'is' thành '==' (SyntaxWarning)
@@ -532,7 +532,7 @@ def find_zi_wei_position(cuc, ngaySinhAmLich):
     return shift_palace(cungDan, saiLech)
 
 
-def find_growth_stage_start(bureau):
+def find_growth_stage_start(wu_xing_ju):
     """Tìm vị trí sao Tràng Sinh theo số Cục.
 
     Theo tài liệu Tử Vi:
@@ -550,7 +550,7 @@ def find_growth_stage_start(bureau):
     - Nữ: Đếm nghịch (ngược chiều kim đồng hồ)
 
     Args:
-        bureau (int): Số cục (2, 3, 4, 5, 6)
+        wu_xing_ju (int): Số cục (2, 3, 4, 5, 6)
 
     Returns:
         int: Vị trí cung của sao Tràng Sinh (3, 6, 9, hoặc 12)
@@ -558,16 +558,16 @@ def find_growth_stage_start(bureau):
     Raises:
         Exception: Nếu số cục không hợp lệ
     """
-    if bureau == 6:  # Hỏa lục cục
+    if wu_xing_ju == 6:  # Hỏa lục cục
         return 3  # Tràng sinh ở Dần
-    elif bureau == 4:  # Kim tứ cục
+    elif wu_xing_ju == 4:  # Kim tứ cục
         return 6  # Tràng sinh ở Tỵ
-    elif bureau == 2 or bureau == 5:  # Thủy nhị cục, Thổ ngũ cục
+    elif wu_xing_ju == 2 or wu_xing_ju == 5:  # Thủy nhị cục, Thổ ngũ cục
         return 9  # Tràng sinh ở Thân
-    elif bureau == 3:  # Mộc tam cục
+    elif wu_xing_ju == 3:  # Mộc tam cục
         return 12  # Tràng sinh ở Hợi
     else:
-        # print bureau
+        # print wu_xing_ju
         raise Exception("Không tìm được cung an sao Trường sinh")
 
 
