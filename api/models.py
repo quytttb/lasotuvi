@@ -1,150 +1,228 @@
-"""
-Pydantic models for API request/response validation
-"""
-from datetime import date, datetime
-from typing import Optional, Literal
+"""Pydantic models for API request/response validation (English keys, API v2)."""
+from datetime import datetime
+from typing import Any, Literal, Optional
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
+BRIGHTNESS_LABELS = {
+    "M": "Miếu",
+    "V": "Vượng",
+    "Đ": "Đắc",
+    "D": "Đắc",
+    "B": "Bình",
+    "H": "Hãm",
+}
+
+STAR_CATEGORY_LABELS = {
+    1: "major_star",
+    2: "minor_star",
+    3: "noble_star",
+    4: "authority_star",
+    5: "blessing_star",
+    6: "literary_star",
+    7: "pavilion_star",
+    8: "peach_blossom_star",
+    11: "malefic_star",
+    12: "defeat_star",
+    13: "obscure_star",
+    14: "lust_star",
+    15: "punishment_star",
+    16: "minor_star",
+}
+
+
 class BirthInfoRequest(BaseModel):
-    """Request model cho thông tin sinh"""
-    
+    """Birth data used to generate a chart."""
+
     model_config = ConfigDict(
         str_strip_whitespace=True,
         json_schema_extra={
             "example": {
-                "ngay": 15,
-                "thang": 8,
-                "nam": 1990,
-                "gio": 7,
-                "gioi_tinh": 1,
-                "duong_lich": True,
+                "day": 15,
+                "month": 8,
+                "year": 1990,
+                "hour": 7,
+                "gender": 1,
+                "is_solar": True,
                 "timezone": 7,
-                "ten": "Nguyễn Văn A"
+                "name": "Nguyễn Văn A",
+                "view_year": 2026,
             }
-        }
+        },
     )
-    
-    ngay: int = Field(..., ge=1, le=31, description="Ngày sinh (1-31)")
-    thang: int = Field(..., ge=1, le=12, description="Tháng sinh (1-12)")
-    nam: int = Field(..., ge=1900, le=2100, description="Năm sinh (1900-2100)")
-    gio: int = Field(..., ge=1, le=12, description="Giờ sinh (1-12, theo địa chi)")
-    gioi_tinh: Literal[1, -1] = Field(..., description="Giới tính: 1=Nam, -1=Nữ")
-    duong_lich: bool = Field(True, description="True=Dương lịch, False=Âm lịch")
-    timezone: int = Field(7, ge=-12, le=14, description="Múi giờ (default: +7 VN)")
-    ten: Optional[str] = Field(None, max_length=100, description="Tên người (optional)")
-    
-    @field_validator('gio')
+
+    day: int = Field(..., ge=1, le=31, description="Birth day (1-31)")
+    month: int = Field(..., ge=1, le=12, description="Birth month (1-12)")
+    year: int = Field(..., ge=1900, le=2100, description="Birth year")
+    hour: int = Field(..., ge=1, le=12, description="Birth hour branch index (1=Zi ... 12=Hai)")
+    gender: Literal[1, -1] = Field(..., description="1=male, -1=female")
+    is_solar: bool = Field(True, description="True if Gregorian date, False if lunar")
+    timezone: int = Field(7, ge=-12, le=14, description="Timezone offset (default +7 VN)")
+    name: Optional[str] = Field(None, max_length=100, description="Optional display name")
+    view_year: Optional[int] = Field(
+        None,
+        ge=1900,
+        le=2200,
+        description="Year used for monthly luck overlay (Gregorian)",
+    )
+
+    @field_validator("hour")
     @classmethod
-    def validate_gio(cls, v: int) -> int:
-        """Validate giờ sinh"""
+    def validate_hour(cls, v: int) -> int:
         if not 1 <= v <= 12:
-            raise ValueError("Giờ sinh phải từ 1-12 (Tý=1, Sửu=2, ..., Hợi=12)")
-        return v
-    
-    @field_validator('gioi_tinh')
-    @classmethod
-    def validate_gioi_tinh(cls, v: int) -> int:
-        """Validate giới tính"""
-        if v not in [1, -1]:
-            raise ValueError("Giới tính phải là 1 (Nam) hoặc -1 (Nữ)")
+            raise ValueError("hour must be 1-12 (Zi=1 ... Hai=12)")
         return v
 
 
 class LunarDateResponse(BaseModel):
-    """Response model cho ngày âm lịch"""
-    
-    model_config = ConfigDict(str_strip_whitespace=True)
-    
-    ngay_am: int
-    thang_am: int
-    nam_am: int
-    thang_nhuan: bool = False
+    day: int
+    month: int
+    year: int
+    is_leap_month: bool = False
 
 
-class CanChiResponse(BaseModel):
-    """Response model cho Can Chi"""
-    
-    model_config = ConfigDict(str_strip_whitespace=True)
-    
-    can_nam: int
-    chi_nam: int
-    can_thang: int
-    ten_can_nam: str
-    ten_chi_nam: str
+class SolarDateResponse(BaseModel):
+    day: int
+    month: int
+    year: int
 
 
-class CungInfo(BaseModel):
-    """Thông tin một cung trong địa bàn"""
-    
-    cung_so: int = Field(..., ge=1, le=12)
-    cung_ten: str
-    cung_chu: Optional[str] = None
-    hanh_cung: str
-    cung_am_duong: int
-    cung_sao: list[dict] = []
-    cung_dai_han: Optional[int] = None
-    cung_tieu_han: Optional[str] = None
-    cung_than: bool = False
-    tuan_trung: bool = False
-    triet_lo: bool = False
+class StemBranchPair(BaseModel):
+    stem: int
+    branch: int
+    stem_name: str
+    branch_name: str
+    label: str
 
 
-class DiaBanResponse(BaseModel):
-    """Response model cho địa bàn hoàn chỉnh"""
-    
-    model_config = ConfigDict(str_strip_whitespace=True)
-    
-    thang_sinh_am_lich: int
-    gio_sinh_am_lich: int
-    cung_menh: int
-    cung_than: int
-    cuc: int
-    ten_cuc: str
-    thap_nhi_cung: list[CungInfo]
+class StemBranchResponse(BaseModel):
+    """Full stem–branch for year/month/day/hour."""
+
+    year_stem: int
+    year_branch: int
+    month_stem: int
+    year_stem_name: str
+    year_branch_name: str
+
+    month_branch: Optional[int] = None
+    month_stem_name: Optional[str] = None
+    month_branch_name: Optional[str] = None
+    day_stem: Optional[int] = None
+    day_branch: Optional[int] = None
+    day_stem_name: Optional[str] = None
+    day_branch_name: Optional[str] = None
+    hour_stem: Optional[int] = None
+    hour_branch: Optional[int] = None
+    hour_stem_name: Optional[str] = None
+    hour_branch_name: Optional[str] = None
+    year: Optional[StemBranchPair] = None
+    month: Optional[StemBranchPair] = None
+    day: Optional[StemBranchPair] = None
+    hour: Optional[StemBranchPair] = None
+
+
+class StarInfo(BaseModel):
+    id: int
+    name: str
+    element: Optional[str] = None
+    category: Optional[int] = None
+    category_label: Optional[str] = None
+    brightness: Optional[str] = None
+    brightness_label: Optional[str] = None
+    direction: Optional[str] = None
+    yin_yang: Optional[Any] = None
+    is_growth_cycle: bool = False
+    is_auspicious: Optional[bool] = None
+    palace_position: Optional[int] = None
+
+
+class StarInterpretation(BaseModel):
+    """Reading for one star in a palace (from the interpretation knowledge base)."""
+
+    star: str
+    interpretation: str
+
+
+class ChartFormation(BaseModel):
+    """Detected chart formation / pattern (cách cục)."""
+
+    code: str
+    name: str
+    description: str
+
+
+class PalaceInfo(BaseModel):
+    index: int = Field(..., ge=1, le=12)
+    branch_name: str
+    palace_name: Optional[str] = None
+    palace_element: str
+    yin_yang: int
+    stem: Optional[int] = None
+    stem_name: Optional[str] = None
+    stars: list[StarInfo] = []
+    interpretations: list[StarInterpretation] = []
+    major_period_age: Optional[int] = None
+    annual_luck_branch: Optional[str] = None
+    monthly_luck: Optional[int] = None
+    is_body_palace: bool = False
+    is_xun: bool = False
+    is_triet: bool = False
+
+
+class ChartMeta(BaseModel):
+    natal_element_name: Optional[str] = None
+    nayin: Optional[str] = None
+    year_yin_yang: Optional[str] = None
+    life_yin_yang_status: Optional[str] = None
+    life_master: Optional[str] = None
+    body_master: Optional[str] = None
+    generation_control_status: Optional[str] = None
+    bureau_name: Optional[str] = None
+    bureau: Optional[int] = None
+    view_year: Optional[int] = None
+    view_year_branch: Optional[str] = None
+
+
+class EarthPlateResponse(BaseModel):
+    lunar_birth_month: int
+    lunar_birth_hour: int
+    life_palace: int
+    body_palace: int
+    bureau: int
+    bureau_name: str
+    palaces: list[PalaceInfo]
+    formations: list[ChartFormation] = []
+    chart_meta: Optional[ChartMeta] = None
 
 
 class ChartResponse(BaseModel):
-    """Response model cho lá số hoàn chỉnh"""
-    
-    model_config = ConfigDict(str_strip_whitespace=True)
-    
     birth_info: BirthInfoRequest
     lunar_date: LunarDateResponse
-    can_chi: CanChiResponse
-    dia_ban: DiaBanResponse
+    stem_branch: StemBranchResponse
+    earth_plate: EarthPlateResponse
+    formations: list[ChartFormation] = []
+    chart_meta: Optional[ChartMeta] = None
     generated_at: datetime = Field(default_factory=datetime.now)
 
 
 class HealthResponse(BaseModel):
-    """Health check response"""
-    
     status: str
     version: str
     timestamp: datetime = Field(default_factory=datetime.now)
 
 
 class ErrorResponse(BaseModel):
-    """Error response model"""
-    
     error: str
     detail: Optional[str] = None
     timestamp: datetime = Field(default_factory=datetime.now)
 
 
 class BatchChartRequest(BaseModel):
-    """Batch request for multiple charts"""
-    
-    model_config = ConfigDict(str_strip_whitespace=True)
-    
-    charts: list[BirthInfoRequest] = Field(..., min_length=1, max_length=10, description="List of birth info (max 10)")
+    charts: list[BirthInfoRequest] = Field(..., min_length=1, max_length=10)
 
 
 class BatchChartResponse(BaseModel):
-    """Batch response for multiple charts"""
-    
-    model_config = ConfigDict(str_strip_whitespace=True)
-    
     total: int
     successful: int
     failed: int
@@ -152,46 +230,45 @@ class BatchChartResponse(BaseModel):
     generated_at: datetime = Field(default_factory=datetime.now)
 
 
-class ChartSummary(BaseModel):
-    """Summary of a chart for listing"""
-    
-    model_config = ConfigDict(str_strip_whitespace=True)
-    
-    ten: Optional[str]
-    ngay_sinh: str
-    cung_menh: int
-    cuc: str
-    chu_menh: str
-    generated_at: datetime
-
-
 class PalaceAnalysis(BaseModel):
-    """Analysis of a specific palace"""
-    
-    model_config = ConfigDict(str_strip_whitespace=True)
-    
-    cung_so: int
-    cung_ten: str
-    cung_chu: str
-    main_stars: list[str]
+    index: int
+    branch_name: str
+    palace_name: str
+    major_stars: list[str]
     support_stars: list[str]
     element: str
-    strength: str  # "Weak", "Normal", "Strong", "Very Strong"
+    strength: str
     positive_aspects: list[str]
     negative_aspects: list[str]
 
 
 class ChartAnalysisResponse(BaseModel):
-    """Detailed chart analysis"""
-    
-    model_config = ConfigDict(str_strip_whitespace=True)
-    
     birth_info: BirthInfoRequest
-    life_palace_analysis: PalaceAnalysis
-    career_palace_analysis: PalaceAnalysis
-    wealth_palace_analysis: PalaceAnalysis
+    life_palace_analysis: Optional[PalaceAnalysis] = None
+    career_palace_analysis: Optional[PalaceAnalysis] = None
+    wealth_palace_analysis: Optional[PalaceAnalysis] = None
     overall_strength: str
     lucky_elements: list[str]
     unlucky_elements: list[str]
     major_life_events: list[dict]
     generated_at: datetime = Field(default_factory=datetime.now)
+
+
+class StarCatalogItem(BaseModel):
+    id: int
+    name: str
+    element: Optional[str] = None
+    category: Optional[int] = None
+    category_label: Optional[str] = None
+    direction: Optional[str] = None
+    yin_yang: Optional[Any] = None
+    is_growth_cycle: bool = False
+    description: Optional[str] = None
+    meaning: Optional[str] = None
+
+
+class StarCatalogResponse(BaseModel):
+    total: int
+    items: list[StarCatalogItem]
+    brightness: dict[str, str] = BRIGHTNESS_LABELS
+    category_labels: dict[int, str] = STAR_CATEGORY_LABELS

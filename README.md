@@ -1,23 +1,31 @@
 # LasoTuVi
 
-Mã nguồn mở an sao lá số Tử Vi (Python 3.12+) với REST API FastAPI và frontend Next.js.
+Open-source Zi Wei Dou Shu (Purple Star Astrology) chart engine — Python 3.12+, FastAPI, Next.js.
 
-Repo này phát triển độc lập. Không đồng bộ và không phụ thuộc vào các fork/upstream đã ngừng duy trì.
+This repository is maintained independently (not synced with abandoned upstream forks).
 
-## Tính năng
+## Features
 
-- An sao đầy đủ: địa bàn 12 cung, chính tinh / phụ tinh, chất lượng sao
-- Đổi lịch dương ↔ âm, Can Chi
-- REST API (FastAPI + Pydantic v2) với OpenAPI docs
+- Full star placement: 12 palaces, major/minor stars, brightness (Miao/Wang/…)
+- Solar ↔ lunar conversion, full stem–branch (year/month/day/hour)
+- REST API v2 (**English JSON keys**, breaking)
+- Client-friendly star fields: `brightness`, `category_label`, `is_auspicious`
+- Monthly luck via `view_year`
+- Star catalog: `GET /info/stars`
 - Frontend scaffold: Next.js 15 + React 19 + TypeScript + Tailwind
-- Bộ test hiện đại (pytest)
+- Modern pytest suite
 
-## Yêu cầu
+## Terminology
+
+Sino-Vietnamese domain terms (Hán Việt ↔ 繁體 ↔ English): see [docs/TERMINOLOGY.md](docs/TERMINOLOGY.md).  
+Code naming (PEP 8 English): see [docs/NAMING.md](docs/NAMING.md).
+
+## Requirements
 
 - Python ≥ 3.12
-- Node.js ≥ 20 (cho frontend)
+- Node.js ≥ 20 (frontend)
 
-## Cài đặt nhanh
+## Quick start
 
 ```bash
 python3 -m venv .venv
@@ -25,56 +33,66 @@ source .venv/bin/activate
 pip install -r requirements.txt -r requirements-api.txt -r requirements-dev.txt
 ```
 
-### Chạy API
+### API
 
 ```bash
 ./run_api.sh
-# hoặc
+# or
 uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+- Swagger: http://localhost:8000/docs
 - Health: http://localhost:8000/health
 
-### Chạy frontend
+Example body for `POST /chart/generate`:
+
+```json
+{
+  "day": 15,
+  "month": 8,
+  "year": 1990,
+  "hour": 7,
+  "gender": 1,
+  "is_solar": true,
+  "timezone": 7,
+  "name": "Example",
+  "view_year": 2026
+}
+```
+
+### Frontend
 
 ```bash
 cd frontend
-./setup.sh   # hoặc: npm install
+./setup.sh
 npm run dev
 ```
 
-Mở http://localhost:3000 (cấu hình API URL trong `frontend/.env.local`).
-
-## Cấu trúc
+## Layout
 
 ```
-lasotuvi/     # Engine an sao (AmDuong, DiaBan, Sao, lịch…)
-api/          # FastAPI service layer + endpoints
-frontend/     # Next.js client
-tests/        # pytest
+lasotuvi/          # Engine (stem_branch, earth_plate, stars, chart_builder, …)
+api/               # FastAPI v2
+frontend/          # Next.js client
+tests/
+docs/TERMINOLOGY.md
+docs/NAMING.md
 ```
 
-## Tài liệu thêm
-
-- [QUICKSTART.md](QUICKSTART.md) — hướng dẫn chạy nhanh
-- [API_README.md](API_README.md) — chi tiết endpoints
-
-## Thư viện Python
+## Python library
 
 ```bash
 pip install -e .
 ```
 
-Hoặc dùng trực tiếp:
-
 ```python
-from lasotuvi.App import lapDiaBan
+from lasotuvi.chart_builder import build_earth_plate
+from lasotuvi.heaven_plate import HeavenPlate
 
-# xem demo.py
+plate = build_earth_plate(15, 8, 1990, 7, 1, True, 7)
+heaven = HeavenPlate(15, 8, 1990, 7, 1, "Name", plate)
 ```
 
-## Giấy phép
+## License
 
-MIT. Engine an sao kế thừa từ dự án mã nguồn mở gốc của doanguyen (2016); bản này được hiện đại hóa và duy trì độc lập tại [quytttb/lasotuvi](https://github.com/quytttb/lasotuvi).
+MIT. Chart engine originally by doanguyen (2016); this fork modernized and maintained independently at [quytttb/lasotuvi](https://github.com/quytttb/lasotuvi).

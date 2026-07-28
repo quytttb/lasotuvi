@@ -1,0 +1,55 @@
+{
+  "formations": {
+    "emperor_treasury_military_minister": {
+      "name": "Tử Phủ Vũ Tướng",
+      "description": "Tử Vi, Thiên Phủ, Vũ Khúc, Thiên Tướng hội hợp ở Mệnh và tam phương tứ chính. Cách cục lãnh đạo, quyền lực, tổ chức; hợp việc lớn, trọng danh dự."
+    },
+    "killings_breaker_ambition": {
+      "name": "Sát Phá Tham",
+      "description": "Thất Sát, Phá Quân, Tham Lang hội chiếu. Cách cục hành động, biến động; hợp võ nghiệp, kinh doanh đột phá; đời thường nhiều thăng trầm."
+    },
+    "advisor_moon_harmony_elder": {
+      "name": "Cơ Nguyệt Đồng Lương",
+      "description": "Thiên Cơ, Thái Âm, Thiên Đồng, Thiên Lương hội hợp. Thiên về văn nghiệp, công chức, tư vấn; tính ôn hòa, thích kế hoạch."
+    },
+    "gate_sun": {
+      "name": "Cự Nhật",
+      "description": "Cự Môn và Thái Dương hội chiếu (Nhật xuất Lôi môn). Đắc địa: tài ăn nói, luật, giáo dục. Hãm địa: thị phi, tranh luận."
+    },
+    "empty_life_major_stars": {
+      "name": "Vô Chính Diệu",
+      "description": "Cung Mệnh không có chính tinh. Bản mệnh uyển chuyển, hay nương nhờ; cần mượn chính tinh cung xung chiếu để luận."
+    }
+  },
+  "palaces": {
+    "Mệnh": {
+      "Tử vi": "Chủ khí chất đế vương, thích chỉ huy, trọng danh dự. Đắc địa: uy nghi, có người giúp. Hãm hoặc hội sát: cô độc, áp lực trách nhiệm.",
+      "Thiên phủ": "Ổn định, thủ tài, biết tích lũy. Hợp quản lý, hành chính. Ít liều lĩnh; cần tránh quá bảo thủ.",
+      "Vũ khúc": "Cương nghị, thực tế, giỏi tài chính / võ / kỹ thuật. Đắc địa: có của. Hội sát: tính nóng, dễ xung đột.",
+      "Thiên tướng": "Ấn tín, trung gian, hỗ trợ lãnh đạo. Tính ngay thẳng, hợp công chức, pháp lý, trợ lý cấp cao.",
+      "Thất sát": "Quả quyết, thích quyền lực hoặc môi trường cạnh tranh. Đắc địa: tướng tài. Hãm / nhiều sát: sóng gió sự nghiệp.",
+      "Phá quân": "Thích đổi mới, phá cách cũ. Cuộc đời nhiều biến động; hợp khởi nghiệp, cải tổ. Cần kỷ luật kẻo đổ vỡ.",
+      "Tham lang": "Ham học hỏi, đa tài, thích giao tế / đào hoa. Đắc địa: danh lợi. Hội sát dâm: tán tài, đa dục.",
+      "Thiên cơ": "Thông minh, đa mưu, hay suy nghĩ. Hợp nghiên cứu, kỹ thuật, tư vấn. Dễ lo âu, thay đổi ý.",
+      "Thái âm": "Ấm áp, trực giác, thích nghệ thuật / nội trợ / tài chính mềm. Nữ đắc địa tốt về hưởng thụ. Nam cần tránh ủy mị.",
+      "Thiên đồng": "Hòa đồng, phúc khí, thích an nhàn. Trẻ được cưng; lớn cần tự lập kẻo ỷ lại.",
+      "Thiên lương": "Trưởng thượng, che chở, thanh cao. Hợp y tế, giáo dục, tôn giáo, cố vấn.",
+      "Liêm trinh": "Cương trực, trọng khí tiết; cũng chủ đào hoa / hình ngục tùy hội sao. Đắc cát: thanh liêm. Hội sát: thị phi.",
+      "Thái Dương": "Quang minh, nhiệt tình, thích xuất đầu. Nam đắc địa tốt danh. Nữ / hãm địa: vất vả vì người khác.",
+      "Cự môn": "Miệng lưỡi, biện luận, nghiên cứu sâu. Đắc địa: luật sư, giảng dạy. Hãm: thị phi miệng tiếng."
+    },
+    "Phu thê": {
+      "Tử vi": "Người phối ngẫu tính cương, có dục vọng thống trị; thiếu giao lưu tình cảm nếu không hội cát. Hội Không Kiếp Hỏa Linh: dễ bất hòa."
+    },
+    "Quan lộc": {
+      "Tử vi": "Sự nghiệp mang tính lãnh đạo, quản lý; thích vị trí cao. Cần uy tín và người phụ tá.",
+      "Thất sát": "Công danh cạnh tranh mạnh; hợp quân sự, phẫu thuật, khởi nghiệp rủi ro cao.",
+      "Vũ khúc": "Sự nghiệp gắn tiền bạc, kỹ thuật, võ / tài chính. Thực tế, ít hoa mỹ."
+    },
+    "Tài Bạch": {
+      "Thiên phủ": "Biết giữ của, tài chính ổn định; hợp kế toán, quản lý quỹ.",
+      "Vũ khúc": "Kiếm tiền mạnh, thích kinh doanh thực tế; tránh đầu cơ quá tay khi hội sát.",
+      "Tham lang": "Tiền đến từ giao tế, đa ngành; dễ tiêu xài / đầu tư cảm tính."
+    }
+  }
+}

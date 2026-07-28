@@ -1,357 +1,544 @@
-"""
-Service layer cho business logic
-"""
-from typing import Tuple, Dict, Any
-from lasotuvi.Lich_HND import S2L, L2S
-from lasotuvi.AmDuong import (
-    ngayThangNamCanChi,
-    thienCan,
-    diaChi,
-    timCuc,
-    nguHanh
+"""Service layer for Zi Wei Dou Shu chart calculations."""
+from __future__ import annotations
+
+from datetime import date
+from typing import Any, Optional
+
+from lasotuvi.analysis import ChartAnalyzer
+from lasotuvi.stem_branch import (
+    day_stem_branch,
+    EARTHLY_BRANCHES,
+    month_year_stem_branch,
+    five_element,
+    HEAVENLY_STEMS,
+    find_element_bureau,
 )
-from lasotuvi.DiaBan import diaBan, cungDiaBan
-from lasotuvi.App import lapDiaBan
+from lasotuvi.chart_builder import build_earth_plate
+from lasotuvi.earth_plate import EarthPlate
+from lasotuvi.lunar_calendar import julian_day_from_date, lunar_to_solar, solar_to_lunar
+from lasotuvi.heaven_plate import HeavenPlate
+
 from api.models import (
+    BRIGHTNESS_LABELS,
+    STAR_CATEGORY_LABELS,
     BirthInfoRequest,
+    ChartAnalysisResponse,
+    ChartFormation,
+    ChartMeta,
+    ChartResponse,
+    EarthPlateResponse,
     LunarDateResponse,
-    CanChiResponse,
-    CungInfo,
-    DiaBanResponse,
-    ChartResponse
+    PalaceAnalysis,
+    PalaceInfo,
+    SolarDateResponse,
+    StarCatalogItem,
+    StarCatalogResponse,
+    StarInfo,
+    StarInterpretation,
+    StemBranchPair,
+    StemBranchResponse,
 )
+from api.star_catalog import SAO_CATALOG
+
+HOUR_BRANCH_RANGES: dict[int, str] = {
+    1: "23h - 1h",
+    2: "1h - 3h",
+    3: "3h - 5h",
+    4: "5h - 7h",
+    5: "7h - 9h",
+    6: "9h - 11h",
+    7: "11h - 13h",
+    8: "13h - 15h",
+    9: "15h - 17h",
+    10: "17h - 19h",
+    11: "19h - 21h",
+    12: "21h - 23h",
+}
+
+_STEM_OF_YIN: dict[int, int] = {
+    1: 3,
+    2: 5,
+    3: 7,
+    4: 9,
+    5: 1,
+    6: 3,
+    7: 5,
+    8: 7,
+    9: 9,
+    10: 1,
+}
+
+
+def _pair(stem: int, branch: int) -> StemBranchPair:
+    stem_name = HEAVENLY_STEMS[stem]["stem_name"]
+    branch_name = EARTHLY_BRANCHES[branch]["branch_name"]
+    return StemBranchPair(
+        stem=stem,
+        branch=branch,
+        stem_name=stem_name,
+        branch_name=branch_name,
+        label=f"{stem_name} {branch_name}",
+    )
+
+
+def _normalize_star(raw: dict[str, Any]) -> StarInfo:
+    star_id = int(raw.get("star_id") or raw.get("id") or 0)
+    name = raw.get("name") or raw.get("saoTen") or ""
+    category = raw.get("category", raw.get("saoLoai"))
+    try:
+        category_int = int(category) if category is not None else None
+    except (TypeError, ValueError):
+        category_int = None
+
+    brightness = raw.get("brightness") or raw.get("saoDacTinh")
+    if brightness == "D":
+        brightness = "Đ"
+
+    is_auspicious: Optional[bool] = None
+    if category_int is not None:
+        is_auspicious = category_int < 10
+
+    return StarInfo(
+        id=star_id,
+        name=name,
+        element=raw.get("element") or raw.get("saoNguHanh"),
+        category=category_int,
+        category_label=STAR_CATEGORY_LABELS.get(category_int) if category_int is not None else None,
+        brightness=brightness,
+        brightness_label=BRIGHTNESS_LABELS.get(brightness) if brightness else None,
+        direction=raw.get("direction") or raw.get("saoPhuongVi") or None,
+        yin_yang=raw.get("yin_yang", raw.get("saoAmDuong")),
+        is_growth_cycle=bool(raw.get("is_growth_cycle") or raw.get("vongTrangSinh")),
+        is_auspicious=is_auspicious,
+        palace_position=raw.get("palace_position") or raw.get("saoViTriCung"),
+    )
+
+
+def palace_stems(year_stem: int) -> dict[int, int]:
+    """Stem of each palace via Five Tigers escape (Ngũ Hổ Độn)."""
+    stem_yin = _STEM_OF_YIN[year_stem]
+    result: dict[int, int] = {}
+    for i in range(1, 13):
+        offset = (i - 3 + 12) % 12
+        result[i] = ((stem_yin - 1 + offset) % 10) + 1
+    return result
+
+
+def monthly_luck_map(
+    annual_luck_palace: int,
+    birth_month: int,
+    birth_hour_branch: int,
+) -> dict[int, int]:
+    """Return {palace_index: month_number} for monthly luck overlay."""
+    month_1_palace = (
+        (annual_luck_palace - 1 - (birth_month - 1) + (birth_hour_branch - 1) + 120) % 12
+    ) + 1
+    result: dict[int, int] = {}
+    for month in range(1, 13):
+        palace = ((month_1_palace - 1 + (month - 1) + 120) % 12) + 1
+        result[palace] = month
+    return result
 
 
 class TuViService:
-    """Service xử lý các tính toán Tử Vi"""
-    
+    """Zi Wei chart service."""
+
     @staticmethod
     def convert_solar_to_lunar(
-        ngay: int,
-        thang: int,
-        nam: int,
-        timezone: int = 7
+        day: int, month: int, year: int, timezone: int = 7
     ) -> LunarDateResponse:
-        """
-        Chuyển đổi ngày dương lịch sang âm lịch
-        
-        Args:
-            ngay: Ngày dương lịch
-            thang: Tháng dương lịch
-            nam: Năm dương lịch
-            timezone: Múi giờ
-            
-        Returns:
-            LunarDateResponse
-        """
-        result = S2L(ngay, thang, nam, timezone)
-        
+        result = solar_to_lunar(day, month, year, timezone)
         return LunarDateResponse(
-            ngay_am=result[0],
-            thang_am=result[1],
-            nam_am=result[2],
-            thang_nhuan=(result[3] == 1) if len(result) > 3 else False
+            day=result[0],
+            month=result[1],
+            year=result[2],
+            is_leap_month=(result[3] == 1) if len(result) > 3 else False,
         )
-    
+
     @staticmethod
-    def get_can_chi(
-        ngay: int,
-        thang: int,
-        nam: int,
-        duong_lich: bool = True,
-        timezone: int = 7
-    ) -> CanChiResponse:
-        """
-        Lấy Can Chi của ngày
-        
-        Args:
-            ngay: Ngày
-            thang: Tháng
-            nam: Năm
-            duong_lich: True nếu là dương lịch
-            timezone: Múi giờ
-            
-        Returns:
-            CanChiResponse
-        """
-        can_thang, can_nam, chi_nam = ngayThangNamCanChi(
-            ngay, thang, nam, duong_lich, timezone
-        )
-        
-        return CanChiResponse(
-            can_nam=can_nam,
-            chi_nam=chi_nam,
-            can_thang=can_thang,
-            ten_can_nam=thienCan[can_nam]['tenCan'],
-            ten_chi_nam=diaChi[chi_nam]['tenChi']
-        )
-    
+    def convert_lunar_to_solar(
+        day: int,
+        month: int,
+        year: int,
+        is_leap_month: bool = False,
+        timezone: int = 7,
+    ) -> SolarDateResponse:
+        result = lunar_to_solar(day, month, year, 1 if is_leap_month else 0, timezone)
+        return SolarDateResponse(day=result[0], month=result[1], year=result[2])
+
     @staticmethod
-    def create_dia_ban(birth_info: BirthInfoRequest) -> DiaBanResponse:
-        """
-        Tạo địa bàn từ thông tin sinh
-        
-        Args:
-            birth_info: Thông tin sinh
-            
-        Returns:
-            DiaBanResponse
-        """
-        # Chuyển đổi sang âm lịch nếu cần
-        if birth_info.duong_lich:
-            lunar = S2L(
-                birth_info.ngay,
-                birth_info.thang,
-                birth_info.nam,
-                birth_info.timezone
-            )
-            ngay_am, thang_am, nam_am = lunar[0], lunar[1], lunar[2]
+    def get_stem_branch(
+        day: int,
+        month: int,
+        year: int,
+        is_solar: bool = True,
+        timezone: int = 7,
+        hour: Optional[int] = None,
+    ) -> StemBranchResponse:
+        if is_solar:
+            lunar = solar_to_lunar(day, month, year, timezone)
+            lunar_day, lunar_month, lunar_year = lunar[0], lunar[1], lunar[2]
+            solar_day, solar_month, solar_year = day, month, year
         else:
-            ngay_am = birth_info.ngay
-            thang_am = birth_info.thang
-            nam_am = birth_info.nam
-        
-        # Tạo địa bàn
-        db = lapDiaBan(
-            diaBan,
-            nn=ngay_am,
-            tt=thang_am,
-            nnnn=nam_am,
-            gioSinh=birth_info.gio,
-            gioiTinh=birth_info.gioi_tinh,
-            duongLich=False,  # Đã chuyển sang âm lịch rồi
-            timeZone=birth_info.timezone
+            lunar_day, lunar_month, lunar_year = day, month, year
+            solar = lunar_to_solar(lunar_day, lunar_month, lunar_year, 0, timezone)
+            solar_day, solar_month, solar_year = solar[0], solar[1], solar[2]
+
+        month_stem, year_stem, year_branch = month_year_stem_branch(
+            lunar_day, lunar_month, lunar_year, False, timezone
         )
-        
-        # Chuyển đổi sang response model
-        thap_nhi_cung = []
+        month_branch = lunar_month
+        day_stem, day_branch = day_stem_branch(
+            solar_day, solar_month, solar_year, True, timezone
+        )
+
+        hour_branch = hour
+        hour_stem = None
+        if hour_branch is not None:
+            hour_stem = (
+                (julian_day_from_date(solar_day, solar_month, solar_year) - 1) * 2 % 10
+                + hour_branch
+            ) % 10
+            if hour_stem == 0:
+                hour_stem = 10
+
+        year_pair = _pair(year_stem, year_branch)
+        month_pair = _pair(month_stem, month_branch)
+        day_pair = _pair(day_stem, day_branch)
+        hour_pair = _pair(hour_stem, hour_branch) if hour_stem and hour_branch else None
+
+        return StemBranchResponse(
+            year_stem=year_stem,
+            year_branch=year_branch,
+            month_stem=month_stem,
+            year_stem_name=year_pair.stem_name,
+            year_branch_name=year_pair.branch_name,
+            month_branch=month_branch,
+            month_stem_name=month_pair.stem_name,
+            month_branch_name=month_pair.branch_name,
+            day_stem=day_stem,
+            day_branch=day_branch,
+            day_stem_name=day_pair.stem_name,
+            day_branch_name=day_pair.branch_name,
+            hour_stem=hour_stem,
+            hour_branch=hour_branch,
+            hour_stem_name=hour_pair.stem_name if hour_pair else None,
+            hour_branch_name=hour_pair.branch_name if hour_pair else None,
+            year=year_pair,
+            month=month_pair,
+            day=day_pair,
+            hour=hour_pair,
+        )
+
+    @staticmethod
+    def _resolve_lunar(birth: BirthInfoRequest) -> tuple[int, int, int, bool]:
+        if birth.is_solar:
+            lunar = solar_to_lunar(birth.day, birth.month, birth.year, birth.timezone)
+            return lunar[0], lunar[1], lunar[2], bool(lunar[3] == 1)
+        return birth.day, birth.month, birth.year, False
+
+    @staticmethod
+    def _build_chart_meta(
+        birth: BirthInfoRequest,
+        lunar_day: int,
+        lunar_month: int,
+        lunar_year: int,
+        plate: EarthPlate,
+        year_stem: int,
+        year_branch: int,
+        view_year: Optional[int],
+    ) -> ChartMeta:
+        if birth.is_solar:
+            d, m, y = birth.day, birth.month, birth.year
+        else:
+            solar = lunar_to_solar(lunar_day, lunar_month, lunar_year, 0, birth.timezone)
+            d, m, y = solar[0], solar[1], solar[2]
+
+        heaven = HeavenPlate(
+            d,
+            m,
+            y,
+            birth.hour,
+            birth.gender,
+            birth.name or "",
+            plate,
+            is_solar=True,
+            timezone=birth.timezone,
+        )
+
+        view_year_branch = None
+        if view_year is not None:
+            chi = ((view_year - 4) % 12) + 1
+            view_year_branch = EARTHLY_BRANCHES[chi]["branch_name"]
+
+        return ChartMeta(
+            natal_element_name=getattr(heaven, "natal_element_name", None),
+            nayin=getattr(heaven, "nayin", None),
+            year_yin_yang=getattr(heaven, "year_stem_yin_yang", None),
+            life_yin_yang_status=getattr(heaven, "life_yin_yang_status", None),
+            life_master=EARTHLY_BRANCHES[plate.life_palace]["life_master"],
+            body_master=EARTHLY_BRANCHES[year_branch]["body_master"],
+            generation_control_status=getattr(heaven, "generation_control_status", None),
+            bureau_name=getattr(heaven, "bureau_name", None),
+            bureau=five_element(find_element_bureau(plate.life_palace, year_stem))["bureau"],
+            view_year=view_year,
+            view_year_branch=view_year_branch,
+        )
+
+    @staticmethod
+    def create_earth_plate(birth: BirthInfoRequest) -> EarthPlateResponse:
+        lunar_day, lunar_month, lunar_year, _ = TuViService._resolve_lunar(birth)
+
+        plate = build_earth_plate(
+            birth.day,
+            birth.month,
+            birth.year,
+            birth.hour,
+            birth.gender,
+            birth.is_solar,
+            birth.timezone,
+        )
+
+        month_stem, year_stem, year_branch = month_year_stem_branch(
+            lunar_day, lunar_month, lunar_year, False, birth.timezone
+        )
+        stems = palace_stems(year_stem)
+
+        view_year = birth.view_year or date.today().year
+        view_branch = ((view_year - 4) % 12) + 1
+        view_branch_name = EARTHLY_BRANCHES[view_branch]["branch_name"]
+
+        annual_luck_palace = plate.life_palace
         for i in range(1, 13):
-            cung = db.thapNhiCung[i]
-            cung_info = CungInfo(
-                cung_so=cung.cungSo,
-                cung_ten=cung.cungTen,
-                cung_chu=getattr(cung, 'cungChu', None),
-                hanh_cung=cung.hanhCung,
-                cung_am_duong=cung.cungAmDuong,
-                cung_sao=cung.cungSao,
-                cung_dai_han=getattr(cung, 'cungDaiHan', None),
-                cung_tieu_han=getattr(cung, 'cungTieuHan', None),
-                cung_than=cung.cungThan,
-                tuan_trung=getattr(cung, 'tuanTrung', False),
-                triet_lo=getattr(cung, 'trietLo', False)
+            if getattr(plate.palaces[i], "annual_luck_branch", None) == view_branch_name:
+                annual_luck_palace = i
+                break
+
+        month_map = monthly_luck_map(annual_luck_palace, lunar_month, birth.hour)
+
+        analyzer = ChartAnalyzer(plate)
+        formations = [ChartFormation(**f) for f in analyzer.detect_formations()]
+        palace_readings = analyzer.interpret_all_palaces()
+
+        palaces: list[PalaceInfo] = []
+        for i in range(1, 13):
+            palace = plate.palaces[i]
+            raw_stars = getattr(palace, "stars", []) or []
+            stars = [_normalize_star(s if isinstance(s, dict) else s.__dict__) for s in raw_stars]
+            stem = stems[i]
+            palace_name = getattr(palace, "palace_name", None)
+            readings = palace_readings.get(palace_name or "", [])
+            palaces.append(
+                PalaceInfo(
+                    index=palace.index,
+                    branch_name=palace.branch_name,
+                    palace_name=palace_name,
+                    palace_element=palace.palace_element,
+                    yin_yang=palace.yin_yang,
+                    stem=stem,
+                    stem_name=HEAVENLY_STEMS[stem]["stem_name"],
+                    stars=stars,
+                    interpretations=[StarInterpretation(**r) for r in readings],
+                    major_period_age=getattr(palace, "major_period_age", None),
+                    annual_luck_branch=getattr(palace, "annual_luck_branch", None),
+                    monthly_luck=month_map.get(i),
+                    is_body_palace=bool(getattr(palace, "is_body_palace", False)),
+                    is_xun=bool(getattr(palace, "is_xun", False)),
+                    is_triet=bool(getattr(palace, "is_triet", False)),
+                )
             )
-            thap_nhi_cung.append(cung_info)
-        
-        # Lấy thông tin cục
-        can_chi = TuViService.get_can_chi(
-            ngay_am, thang_am, nam_am, False, birth_info.timezone
+
+        bureau_key = find_element_bureau(plate.life_palace, year_stem)
+        bureau_data = five_element(bureau_key)
+        chart_meta = TuViService._build_chart_meta(
+            birth, lunar_day, lunar_month, lunar_year, plate, year_stem, year_branch, view_year
         )
-        cuc_info = timCuc(db.cungMenh, can_chi.can_nam)
-        cuc_data = nguHanh(cuc_info)
-        
-        return DiaBanResponse(
-            thang_sinh_am_lich=db.thangSinhAmLich,
-            gio_sinh_am_lich=db.gioSinhAmLich,
-            cung_menh=db.cungMenh,
-            cung_than=db.cungThan,
-            cuc=cuc_data['cuc'],
-            ten_cuc=cuc_data['tenCuc'],
-            thap_nhi_cung=thap_nhi_cung
+
+        return EarthPlateResponse(
+            lunar_birth_month=plate.lunar_birth_month,
+            lunar_birth_hour=plate.lunar_birth_hour,
+            life_palace=plate.life_palace,
+            body_palace=plate.body_palace,
+            bureau=bureau_data["bureau"],
+            bureau_name=bureau_data["bureau_name"],
+            palaces=palaces,
+            formations=formations,
+            chart_meta=chart_meta,
         )
-    
+
     @staticmethod
-    def generate_full_chart(birth_info: BirthInfoRequest) -> ChartResponse:
-        """
-        Tạo lá số hoàn chỉnh
-        
-        Args:
-            birth_info: Thông tin sinh
-            
-        Returns:
-            ChartResponse
-        """
-        # Lấy ngày âm lịch
-        if birth_info.duong_lich:
-            lunar = TuViService.convert_solar_to_lunar(
-                birth_info.ngay,
-                birth_info.thang,
-                birth_info.nam,
-                birth_info.timezone
-            )
-        else:
-            lunar = LunarDateResponse(
-                ngay_am=birth_info.ngay,
-                thang_am=birth_info.thang,
-                nam_am=birth_info.nam,
-                thang_nhuan=False
-            )
-        
-        # Lấy Can Chi
-        can_chi = TuViService.get_can_chi(
-            lunar.ngay_am,
-            lunar.thang_am,
-            lunar.nam_am,
-            duong_lich=False,
-            timezone=birth_info.timezone
+    def generate_full_chart(birth: BirthInfoRequest) -> ChartResponse:
+        lunar_day, lunar_month, lunar_year, is_leap = TuViService._resolve_lunar(birth)
+        lunar = LunarDateResponse(
+            day=lunar_day, month=lunar_month, year=lunar_year, is_leap_month=is_leap
         )
-        
-        # Tạo địa bàn
-        dia_ban = TuViService.create_dia_ban(birth_info)
-        
+        stem_branch = TuViService.get_stem_branch(
+            birth.day,
+            birth.month,
+            birth.year,
+            is_solar=birth.is_solar,
+            timezone=birth.timezone,
+            hour=birth.hour,
+        )
+        earth_plate = TuViService.create_earth_plate(birth)
         return ChartResponse(
-            birth_info=birth_info,
+            birth_info=birth,
             lunar_date=lunar,
-            can_chi=can_chi,
-            dia_ban=dia_ban
+            stem_branch=stem_branch,
+            earth_plate=earth_plate,
+            formations=earth_plate.formations,
+            chart_meta=earth_plate.chart_meta,
         )
-    
+
     @staticmethod
-    def analyze_palace(cung_data: dict) -> dict:
-        """
-        Analyze a palace for strength and characteristics
-        
-        Args:
-            cung_data: Palace data from dia ban
-            
-        Returns:
-            Analysis dict with strength, stars, aspects
-        """
-        from api.models import PalaceAnalysis
-        
-        # Get stars in palace
-        sao_list = cung_data.get('cung_sao', [])
-        main_stars = []
-        support_stars = []
-        
-        for sao in sao_list:
-            sao_ten = sao.get('saoTen', '')
-            sao_loai = sao.get('saoLoai', 0)
-            
-            # Main stars (Chính tinh): type 1
-            if sao_loai == 1:
-                main_stars.append(sao_ten)
-            # Support stars
-            elif sao_loai in [2, 3, 4, 5]:
-                support_stars.append(sao_ten)
-        
-        # Determine strength based on stars
-        strength = "Normal"
-        if len(main_stars) >= 2:
-            strength = "Strong"
-        elif len(main_stars) >= 3:
-            strength = "Very Strong"
-        elif len(main_stars) == 0:
-            strength = "Weak"
-        
-        # Analyze aspects
-        positive_aspects = []
-        negative_aspects = []
-        
-        # Check for specific beneficial stars
-        beneficial_stars = ['Tử vi', 'Thiên phủ', 'Thái dương', 'Tham lang', 'Thiên cơ']
-        harmful_stars = ['Linh tinh', 'Hỏa tinh', 'Đà la', 'Kình dương', 'Thiên không']
-        
-        for sao in sao_list:
-            sao_ten = sao.get('saoTen', '')
-            if sao_ten in beneficial_stars:
-                positive_aspects.append(f"Có sao {sao_ten} tốt")
-            if sao_ten in harmful_stars:
-                negative_aspects.append(f"Có sao {sao_ten} xấu")
-        
-        return PalaceAnalysis(
-            cung_so=cung_data.get('cung_so', 0),
-            cung_ten=cung_data.get('cung_ten', ''),
-            cung_chu=cung_data.get('cung_chu', ''),
-            main_stars=main_stars,
-            support_stars=support_stars,
-            element=cung_data.get('hanh_cung', ''),
-            strength=strength,
-            positive_aspects=positive_aspects,
-            negative_aspects=negative_aspects
-        )
-    
-    @staticmethod
-    def get_palace_by_type(dia_ban: dict, palace_name: str) -> dict:
-        """
-        Get palace by its name (chu)
-        
-        Args:
-            dia_ban: Dia ban data
-            palace_name: Palace name like "Mệnh", "Quan lộc", etc.
-            
-        Returns:
-            Palace data dict
-        """
-        for cung in dia_ban.get('thap_nhi_cung', []):
-            if palace_name in cung.get('cung_chu', ''):
-                return cung
-        return {}
-    
-    @staticmethod
-    def analyze_chart(birth_info) -> dict:
-        """
-        Generate detailed chart analysis
-        
-        Args:
-            birth_info: BirthInfoRequest
-            
-        Returns:
-            ChartAnalysisResponse
-        """
-        from api.models import ChartAnalysisResponse
-        
-        # Generate full chart first
-        chart = TuViService.generate_full_chart(birth_info)
-        dia_ban_dict = chart.dia_ban.model_dump()
-        
-        # Analyze key palaces
-        life_palace = TuViService.get_palace_by_type(dia_ban_dict, "Mệnh")
-        career_palace = TuViService.get_palace_by_type(dia_ban_dict, "Quan lộc")
-        wealth_palace = TuViService.get_palace_by_type(dia_ban_dict, "Tài Bạch")
-        
-        life_analysis = TuViService.analyze_palace(life_palace) if life_palace else None
-        career_analysis = TuViService.analyze_palace(career_palace) if career_palace else None
-        wealth_analysis = TuViService.analyze_palace(wealth_palace) if wealth_palace else None
-        
-        # Overall strength
-        overall_strength = "Balanced"
-        if life_analysis:
-            strength_val = getattr(life_analysis, 'strength', 'Normal')
-            if strength_val in ["Strong", "Very Strong"]:
-                overall_strength = "Strong"
-        
-        # Lucky elements based on Cục
-        cuc = dia_ban_dict.get('cuc', 0)
-        lucky_elements = []
-        if cuc in [2, 6]:  # Hỏa
-            lucky_elements = ["Hỏa", "Mộc"]
-        elif cuc in [3, 7]:  # Thổ
-            lucky_elements = ["Thổ", "Hỏa"]
-        elif cuc in [4, 8]:  # Kim
-            lucky_elements = ["Kim", "Thổ"]
-        elif cuc in [5, 9]:  # Thủy
-            lucky_elements = ["Thủy", "Kim"]
-        
-        unlucky_elements = []
-        if "Hỏa" in lucky_elements:
-            unlucky_elements.append("Thủy")
-        if "Thủy" in lucky_elements:
-            unlucky_elements.append("Thổ")
-        
-        # Major life events (placeholder - would need more complex logic)
-        major_events = [
-            {"age": 20, "event": "Khởi đầu sự nghiệp", "type": "career"},
-            {"age": 30, "event": "Thành tựu tài chính", "type": "wealth"},
-            {"age": 40, "event": "Ổn định gia đình", "type": "family"},
+    def get_star_catalog() -> StarCatalogResponse:
+        items = [
+            StarCatalogItem(
+                id=s["id"],
+                name=s["ten"],
+                element=s.get("ngu_hanh"),
+                category=s.get("loai"),
+                category_label=STAR_CATEGORY_LABELS.get(s["loai"]) if s.get("loai") is not None else None,
+                direction=s.get("phuong_vi"),
+                yin_yang=s.get("am_duong"),
+                is_growth_cycle=bool(s.get("vong_trang_sinh")),
+                description=s.get("mo_ta"),
+                meaning=s.get("y_nghia"),
+            )
+            for s in SAO_CATALOG
         ]
-        
+        return StarCatalogResponse(total=len(items), items=items)
+
+    @staticmethod
+    def get_hour_branch_info() -> dict[str, Any]:
+        hours = []
+        for i in range(1, 13):
+            hours.append(
+                {
+                    "id": i,
+                    "name": EARTHLY_BRANCHES[i]["branch_name"],
+                    "time_range": HOUR_BRANCH_RANGES[i],
+                    "life_master": EARTHLY_BRANCHES[i]["life_master"],
+                    "body_master": EARTHLY_BRANCHES[i]["body_master"],
+                }
+            )
+        return {
+            "title": "Earthly Branches — birth hours",
+            "description": "12 traditional two-hour periods (Zi starts at 23h)",
+            "hours": hours,
+        }
+
+    @staticmethod
+    def analyze_palace(palace_data: dict) -> PalaceAnalysis:
+        star_list = palace_data.get("stars", [])
+        major_stars: list[str] = []
+        support_stars: list[str] = []
+
+        for star in star_list:
+            if isinstance(star, StarInfo):
+                name, category = star.name, star.category or 0
+            elif isinstance(star, dict):
+                name = star.get("name") or ""
+                category = star.get("category") or 0
+            else:
+                continue
+            if category == 1:
+                major_stars.append(name)
+            elif category in [2, 3, 4, 5, 6, 7, 8]:
+                support_stars.append(name)
+
+        strength = "Normal"
+        if len(major_stars) == 0:
+            strength = "Weak"
+        elif len(major_stars) >= 3:
+            strength = "Very Strong"
+        elif len(major_stars) >= 2:
+            strength = "Strong"
+
+        beneficial = {"Tử vi", "Thiên phủ", "Thái Dương", "Tham lang", "Thiên cơ"}
+        harmful = {"Linh tinh", "Hỏa tinh", "Đà la", "Kình dương", "Thiên không"}
+        positive, negative = [], []
+        for star in star_list:
+            name = star.name if isinstance(star, StarInfo) else star.get("name", "")
+            if name in beneficial:
+                positive.append(f"Has beneficial star {name}")
+            if name in harmful:
+                negative.append(f"Has malefic star {name}")
+
+        return PalaceAnalysis(
+            index=palace_data.get("index", 0),
+            branch_name=palace_data.get("branch_name", ""),
+            palace_name=palace_data.get("palace_name", "") or "",
+            major_stars=major_stars,
+            support_stars=support_stars,
+            element=palace_data.get("palace_element", ""),
+            strength=strength,
+            positive_aspects=positive,
+            negative_aspects=negative,
+        )
+
+    @staticmethod
+    def get_palace_by_name(earth_plate: dict, palace_name: str) -> dict:
+        for palace in earth_plate.get("palaces", []):
+            if palace_name in (palace.get("palace_name") or ""):
+                return palace
+        return {}
+
+    @staticmethod
+    def analyze_chart(birth: BirthInfoRequest) -> ChartAnalysisResponse:
+        chart = TuViService.generate_full_chart(birth)
+        plate = chart.earth_plate.model_dump()
+
+        life = TuViService.get_palace_by_name(plate, "Mệnh")
+        career = TuViService.get_palace_by_name(plate, "Quan lộc")
+        wealth = TuViService.get_palace_by_name(plate, "Tài Bạch")
+
+        life_a = TuViService.analyze_palace(life) if life else None
+        career_a = TuViService.analyze_palace(career) if career else None
+        wealth_a = TuViService.analyze_palace(wealth) if wealth else None
+
+        overall = "Balanced"
+        if life_a and life_a.strength in ("Strong", "Very Strong"):
+            overall = "Strong"
+
+        bureau = plate.get("bureau", 0)
+        lucky: list[str] = []
+        if bureau in (2, 6):
+            lucky = ["Hỏa", "Mộc"]
+        elif bureau in (3, 7):
+            lucky = ["Thổ", "Hỏa"]
+        elif bureau in (4, 8):
+            lucky = ["Kim", "Thổ"]
+        elif bureau in (5, 9):
+            lucky = ["Thủy", "Kim"]
+
+        unlucky: list[str] = []
+        if "Hỏa" in lucky:
+            unlucky.append("Thủy")
+        if "Thủy" in lucky:
+            unlucky.append("Thổ")
+
+        events = []
+        for palace in plate.get("palaces", []):
+            age = palace.get("major_period_age")
+            if age is not None:
+                events.append(
+                    {
+                        "age": age,
+                        "event": f"Major period — {palace.get('palace_name') or palace.get('branch_name')}",
+                        "type": "major_period",
+                        "palace_index": palace.get("index"),
+                    }
+                )
+        events.sort(key=lambda x: x["age"])
+
         return ChartAnalysisResponse(
-            birth_info=birth_info,
-            life_palace_analysis=life_analysis,
-            career_palace_analysis=career_analysis,
-            wealth_palace_analysis=wealth_analysis,
-            overall_strength=overall_strength,
-            lucky_elements=lucky_elements,
-            unlucky_elements=unlucky_elements,
-            major_life_events=major_events
+            birth_info=birth,
+            life_palace_analysis=life_a,
+            career_palace_analysis=career_a,
+            wealth_palace_analysis=wealth_a,
+            overall_strength=overall,
+            lucky_elements=lucky,
+            unlucky_elements=unlucky,
+            major_life_events=events,
         )

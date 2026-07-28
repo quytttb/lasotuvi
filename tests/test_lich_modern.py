@@ -5,7 +5,7 @@ Modern test suite for Lich conversion functions
 
 import pytest
 
-from lasotuvi.Lich_HND import L2S, S2L, NewMoon, getSunLongitude, jdFromDate, jdToDate
+from lasotuvi.lunar_calendar import lunar_to_solar, solar_to_lunar, new_moon, get_sun_longitude, julian_day_from_date, julian_day_to_date
 
 
 class TestJulianDayConversion:
@@ -22,7 +22,7 @@ class TestJulianDayConversion:
     )
     def test_jd_from_date(self, dd, mm, yy, expected_jd):
         """Test tính Julian Day từ ngày dương lịch"""
-        result = jdFromDate(dd, mm, yy)
+        result = julian_day_from_date(dd, mm, yy)
         assert result == expected_jd, f"JD for {dd}/{mm}/{yy} should be {expected_jd}"
 
     @pytest.mark.parametrize(
@@ -35,14 +35,14 @@ class TestJulianDayConversion:
     )
     def test_jd_to_date(self, jd, expected_date):
         """Test chuyển Julian Day về ngày dương lịch"""
-        result = jdToDate(jd)
+        result = julian_day_to_date(jd)
         assert result == expected_date, f"JD {jd} should convert to {expected_date}"
 
     def test_jd_roundtrip(self):
         """Test chuyển đổi qua lại giữa date và JD"""
         dd, mm, yy = 15, 8, 1990
-        jd = jdFromDate(dd, mm, yy)
-        result = jdToDate(jd)
+        jd = julian_day_from_date(dd, mm, yy)
+        result = julian_day_to_date(jd)
         assert result == [dd, mm, yy], "Roundtrip conversion should preserve date"
 
 
@@ -62,7 +62,7 @@ class TestLunarSolarConversion:
     def test_solar_to_lunar(self, solar_date, expected_lunar):
         """Test chuyển dương lịch sang âm lịch"""
         dd, mm, yy, tz = solar_date
-        result = S2L(dd, mm, yy, tz)
+        result = solar_to_lunar(dd, mm, yy, tz)
         assert (
             result == expected_lunar
         ), f"Solar {dd}/{mm}/{yy} should convert to Lunar {expected_lunar}"
@@ -78,7 +78,7 @@ class TestLunarSolarConversion:
     def test_lunar_to_solar(self, lunar_date, expected_solar):
         """Test chuyển âm lịch sang dương lịch"""
         dd, mm, yy, leap, tz = lunar_date
-        result = L2S(dd, mm, yy, leap, tz)
+        result = lunar_to_solar(dd, mm, yy, leap, tz)
         assert (
             result == expected_solar
         ), f"Lunar {dd}/{mm}/{yy} should convert to Solar {expected_solar}"
@@ -86,8 +86,8 @@ class TestLunarSolarConversion:
     def test_lunar_solar_roundtrip(self):
         """Test chuyển đổi qua lại âm dương lịch"""
         dd, mm, yy, tz = 15, 8, 1990, 7
-        lunar = S2L(dd, mm, yy, tz)
-        solar = L2S(lunar[0], lunar[1], lunar[2], lunar[3], tz)
+        lunar = solar_to_lunar(dd, mm, yy, tz)
+        solar = lunar_to_solar(lunar[0], lunar[1], lunar[2], lunar[3], tz)
         assert solar == [dd, mm, yy], "Roundtrip should preserve date"
 
 
@@ -95,16 +95,16 @@ class TestNewMoonCalculation:
     """Test tính toán trăng non"""
 
     def test_new_moon_returns_float(self):
-        """Test NewMoon trả về số thực"""
-        result = NewMoon(0)
-        assert isinstance(result, float), "NewMoon should return float"
-        assert result > 0, "NewMoon JD should be positive"
+        """Test new_moon trả về số thực"""
+        result = new_moon(0)
+        assert isinstance(result, float), "new_moon should return float"
+        assert result > 0, "new_moon JD should be positive"
 
     def test_new_moon_sequence(self):
         """Test chuỗi trăng non tăng dần"""
-        nm0 = NewMoon(0)
-        nm1 = NewMoon(1)
-        nm2 = NewMoon(2)
+        nm0 = new_moon(0)
+        nm1 = new_moon(1)
+        nm2 = new_moon(2)
 
         assert nm1 > nm0, "Later new moon should have larger JD"
         assert nm2 > nm1, "Later new moon should have larger JD"
@@ -119,8 +119,8 @@ class TestSunLongitude:
 
     def test_sun_longitude_range(self):
         """Test kinh độ mặt trời trong khoảng 0-11"""
-        jd = jdFromDate(1, 1, 2000)
-        result = getSunLongitude(jd, 7)
+        jd = julian_day_from_date(1, 1, 2000)
+        result = get_sun_longitude(jd, 7)
         assert 0 <= result <= 11, "Sun longitude should be 0-11"
 
     @pytest.mark.parametrize(
@@ -135,8 +135,8 @@ class TestSunLongitude:
     def test_sun_longitude_seasonal(self, date_info, expected_range):
         """Test tiết khí theo mùa"""
         dd, mm, yy, tz = date_info
-        jd = jdFromDate(dd, mm, yy)
-        result = getSunLongitude(jd, tz)
+        jd = julian_day_from_date(dd, mm, yy)
+        result = get_sun_longitude(jd, tz)
         assert (
             result in expected_range
         ), f"Sun longitude for {dd}/{mm}/{yy} should be in {expected_range}"
@@ -148,14 +148,14 @@ class TestEdgeCases:
     def test_leap_month_1987(self):
         """Test tháng nhuận năm 1987"""
         # Năm 1987 có tháng 6 nhuận
-        result = S2L(29, 8, 1987, 7)
+        result = solar_to_lunar(29, 8, 1987, 7)
         # Kết quả phải có tháng nhuận
         assert len(result) == 4, "Should return [dd, mm, yy, leap]"
 
     def test_year_1983_fix(self):
         """Test case đã fix: năm 1983"""
         # Test case này đã được fix theo TODO
-        result = S2L(1, 1, 1983, 7)
+        result = solar_to_lunar(1, 1, 1983, 7)
         assert result is not None, "Should handle 1983 correctly"
         assert len(result) == 4, "Should return complete result"
 
@@ -173,7 +173,7 @@ class TestEdgeCases:
         # Có thể raise exception hoặc trả về giá trị đặc biệt
         # Tùy thuộc vào implementation
         try:
-            result = S2L(dd, mm, yy, 7)
+            result = solar_to_lunar(dd, mm, yy, 7)
             # Nếu không raise exception, kiểm tra kết quả có hợp lý không
             assert result is not None
         except Exception:

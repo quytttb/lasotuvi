@@ -1,20 +1,16 @@
-
 import unittest
 
 import pytest
 
-from lasotuvi.App import lapDiaBan
-from lasotuvi.DiaBan import diaBan
-from lasotuvi.ThienBan import lapThienBan
+from lasotuvi.chart_builder import build_earth_plate
+from lasotuvi.heaven_plate import HeavenPlate
 
 
 @pytest.mark.thienban
 class TestThienBan(unittest.TestCase):
     def test_thienban_initializable(self):
-        diaban = lapDiaBan(
-            diaBan, nn=24, tt=10, nnnn=1991, gioSinh=7, gioiTinh=1, duongLich=1, timeZone=7
-        )
-        thienban = lapThienBan(24, 10, 1991, 7, 1, "asdf", diaban)
-
-        # Verify thienban was created successfully
-        assert thienban is not None
+        plate = build_earth_plate(24, 10, 1991, 7, 1, True, 7)
+        heaven = HeavenPlate(24, 10, 1991, 7, 1, "asdf", plate)
+        assert heaven is not None
+        assert heaven.bureau_name
+        assert heaven.life_master

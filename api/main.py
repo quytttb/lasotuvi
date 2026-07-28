@@ -1,545 +1,347 @@
-"""
-FastAPI main application
-LasoTuVi REST API - Vietnamese Astrology Chart Generation
-"""
+"""FastAPI application — LasoTuVi REST API v2 (English JSON schema)."""
+from contextlib import asynccontextmanager
+import time
+
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from contextlib import asynccontextmanager
-import time
-from datetime import datetime
 
+from api import __version__
 from api.models import (
-    BirthInfoRequest,
-    ChartResponse,
-    LunarDateResponse,
-    CanChiResponse,
-    DiaBanResponse,
-    HealthResponse,
-    ErrorResponse,
-    ChartAnalysisResponse,
     BatchChartRequest,
-    BatchChartResponse
+    BatchChartResponse,
+    BirthInfoRequest,
+    ChartAnalysisResponse,
+    ChartResponse,
+    EarthPlateResponse,
+    ErrorResponse,
+    HealthResponse,
+    LunarDateResponse,
+    SolarDateResponse,
+    StarCatalogResponse,
+    StemBranchResponse,
 )
 from api.services import TuViService
-from api import __version__
 
 
-# Lifespan context manager for startup/shutdown
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Manage application lifespan"""
-    # Startup
-    print(f"🚀 LasoTuVi API v{__version__} starting up...")
+    print(f"LasoTuVi API v{__version__} starting...")
     yield
-    # Shutdown
-    print("👋 LasoTuVi API shutting down...")
+    print("LasoTuVi API shutting down...")
 
 
-# Create FastAPI app
 app = FastAPI(
     title="LasoTuVi API",
     description="""
-    ## Vietnamese Astrology Chart Generation API
-    
-    Powerful REST API for generating Vietnamese Tử Vi (Purple Star Astrology) charts.
-    
-    ### Features
-    * 🌙 Solar to Lunar calendar conversion
-    * 📅 Can Chi (Heavenly Stems & Earthly Branches) calculations
-    * ⭐ Complete astrological chart generation
-    * 🔍 Detailed palace (cung) information
-    * 🎯 Star positions and qualities
-    
-    ### Tech Stack
-    * FastAPI 0.115+
-    * Pydantic v2 for validation
-    * Python 3.12+
-    * lasotuvi core library
-    
-    ### Usage
-    Use the `/chart/generate` endpoint to create a complete chart from birth information.
+## Zi Wei Dou Shu (Purple Star Astrology) Chart API
+
+Breaking v2 schema: English field names throughout.
+
+### Features
+* Solar ↔ lunar calendar conversion
+* Full stem–branch (year / month / day / hour)
+* Complete earth plate with structured stars (brightness, category)
+* Chart formations (cách cục) and palace star interpretations
+* Chart meta: natal element, life/body masters, generation/control
+* Monthly luck via `view_year`
+* Star reference catalog
+
+### Usage
+`POST /chart/generate` with birth info. Optional `view_year` for monthly luck.
     """,
     version=__version__,
     docs_url="/docs",
     redoc_url="/redoc",
     lifespan=lifespan,
-    contact={
-        "name": "LasoTuVi Project",
-        "url": "https://github.com/quytttb/lasotuvi",
-    },
+    contact={"name": "LasoTuVi Project", "url": "https://github.com/quytttb/lasotuvi"},
     license_info={
-        "name": "License",
+        "name": "MIT",
         "url": "https://github.com/quytttb/lasotuvi/blob/master/LICENSE",
     },
 )
 
-# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify allowed origins
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-# Request logging middleware
 @app.middleware("http")
 async def log_requests(request, call_next):
-    """Log all requests"""
-    import time
-    start_time = time.time()
-    
+    start = time.time()
     response = await call_next(request)
-    
-    process_time = time.time() - start_time
-    response.headers["X-Process-Time"] = str(process_time)
-    
-    # Log request
-    print(f"📝 {request.method} {request.url.path} - {response.status_code} - {process_time:.3f}s")
-    
+    response.headers["X-Process-Time"] = str(time.time() - start)
+    print(f"{request.method} {request.url.path} — {response.status_code}")
     return response
 
 
-# Exception handlers
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
-    """Global exception handler"""
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={
-            "error": "Internal Server Error",
-            "detail": str(exc)
-        }
+        content={"error": "Internal Server Error", "detail": str(exc)},
     )
 
 
-# Routes
-@app.get(
-    "/",
-    summary="Root endpoint",
-    description="Welcome message and API information"
-)
+@app.get("/", tags=["Meta"])
 async def root():
-    """Root endpoint"""
     return {
-        "message": "🌟 Welcome to LasoTuVi API",
+        "message": "Welcome to LasoTuVi API",
         "version": __version__,
         "docs": "/docs",
         "health": "/health",
         "endpoints": {
             "chart_generation": "/chart/generate",
-            "lunar_conversion": "/calendar/solar-to-lunar",
-            "can_chi": "/calendar/can-chi"
-        }
+            "solar_to_lunar": "/calendar/solar-to-lunar",
+            "lunar_to_solar": "/calendar/lunar-to-solar",
+            "stem_branch": "/calendar/stem-branch",
+            "star_catalog": "/info/stars",
+        },
     }
 
 
-@app.get(
-    "/health",
-    response_model=HealthResponse,
-    summary="Health check",
-    description="Check API health status"
-)
+@app.get("/health", response_model=HealthResponse, tags=["Meta"])
 async def health_check():
-    """Health check endpoint"""
-    return HealthResponse(
-        status="healthy",
-        version=__version__
-    )
+    return HealthResponse(status="healthy", version=__version__)
 
 
-@app.post(
-    "/calendar/solar-to-lunar",
-    response_model=LunarDateResponse,
-    summary="Convert solar to lunar date",
-    description="Convert Gregorian calendar date to Vietnamese lunar calendar date",
-    tags=["Calendar"]
-)
-async def solar_to_lunar(
-    ngay: int,
-    thang: int,
-    nam: int,
-    timezone: int = 7
+@app.post("/calendar/solar-to-lunar", response_model=LunarDateResponse, tags=["Calendar"])
+async def solar_to_lunar(day: int, month: int, year: int, timezone: int = 7):
+    try:
+        return TuViService.convert_solar_to_lunar(day, month, year, timezone)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@app.post("/calendar/lunar-to-solar", response_model=SolarDateResponse, tags=["Calendar"])
+async def lunar_to_solar(
+    day: int,
+    month: int,
+    year: int,
+    is_leap_month: bool = False,
+    timezone: int = 7,
 ):
-    """
-    Convert solar (Gregorian) date to lunar (Vietnamese) date
-    
-    **Parameters:**
-    * `ngay`: Day (1-31)
-    * `thang`: Month (1-12)
-    * `nam`: Year (1900-2100)
-    * `timezone`: Timezone offset (default: 7 for Vietnam)
-    
-    **Returns:**
-    * Lunar date with leap month information
-    """
     try:
-        return TuViService.convert_solar_to_lunar(ngay, thang, nam, timezone)
+        return TuViService.convert_lunar_to_solar(day, month, year, is_leap_month, timezone)
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid date or conversion error: {str(e)}"
-        )
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@app.post(
-    "/calendar/can-chi",
-    response_model=CanChiResponse,
-    summary="Get Can Chi",
-    description="Get Heavenly Stems and Earthly Branches for a date",
-    tags=["Calendar"]
-)
-async def get_can_chi(
-    ngay: int,
-    thang: int,
-    nam: int,
-    duong_lich: bool = True,
-    timezone: int = 7
+@app.post("/calendar/stem-branch", response_model=StemBranchResponse, tags=["Calendar"])
+async def get_stem_branch(
+    day: int,
+    month: int,
+    year: int,
+    is_solar: bool = True,
+    timezone: int = 7,
+    hour: int | None = None,
 ):
-    """
-    Get Can Chi (Heavenly Stems & Earthly Branches) for a date
-    
-    **Parameters:**
-    * `ngay`: Day
-    * `thang`: Month
-    * `nam`: Year
-    * `duong_lich`: True for solar calendar, False for lunar
-    * `timezone`: Timezone offset
-    
-    **Returns:**
-    * Can Chi information with Vietnamese names
-    """
     try:
-        return TuViService.get_can_chi(ngay, thang, nam, duong_lich, timezone)
+        return TuViService.get_stem_branch(day, month, year, is_solar, timezone, hour)
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Error calculating Can Chi: {str(e)}"
-        )
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@app.post(
-    "/chart/dia-ban",
-    response_model=DiaBanResponse,
-    summary="Generate Dia Ban",
-    description="Generate the astrological chart base (Dia Ban) with 12 palaces",
-    tags=["Chart"]
-)
-async def generate_dia_ban(birth_info: BirthInfoRequest):
-    """
-    Generate Dia Ban (地盤 - Earth Plate)
-    
-    The Dia Ban is the foundation of a Tử Vi chart, containing:
-    * 12 palaces (Thập Nhị Cung)
-    * Palace attributes (Five Elements, Yin/Yang)
-    * Star positions
-    * Life palace (Cung Mệnh) determination
-    
-    **Request Body:**
-    * Complete birth information (date, time, gender)
-    
-    **Returns:**
-    * Detailed Dia Ban with all 12 palaces
-    """
+# Backward-compatible alias
+@app.post("/calendar/can-chi", response_model=StemBranchResponse, tags=["Calendar"], deprecated=True)
+async def get_can_chi_alias(
+    day: int | None = None,
+    month: int | None = None,
+    year: int | None = None,
+    ngay: int | None = None,
+    thang: int | None = None,
+    nam: int | None = None,
+    is_solar: bool = True,
+    duong_lich: bool | None = None,
+    timezone: int = 7,
+    hour: int | None = None,
+    gio: int | None = None,
+):
+    """Deprecated: use `/calendar/stem-branch`."""
+    d = day if day is not None else ngay
+    m = month if month is not None else thang
+    y = year if year is not None else nam
+    if d is None or m is None or y is None:
+        raise HTTPException(status_code=422, detail="day/month/year required")
+    solar = is_solar if duong_lich is None else duong_lich
+    h = hour if hour is not None else gio
+    return TuViService.get_stem_branch(d, m, y, solar, timezone, h)
+
+
+@app.post("/chart/earth-plate", response_model=EarthPlateResponse, tags=["Chart"])
+async def generate_earth_plate(birth_info: BirthInfoRequest):
     try:
-        return TuViService.create_dia_ban(birth_info)
+        return TuViService.create_earth_plate(birth_info)
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error generating Dia Ban: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@app.post(
-    "/chart/generate",
-    response_model=ChartResponse,
-    summary="Generate Complete Chart",
-    description="Generate a complete Vietnamese Tử Vi astrological chart",
-    tags=["Chart"],
-    status_code=status.HTTP_200_OK
-)
+@app.post("/chart/dia-ban", response_model=EarthPlateResponse, tags=["Chart"], deprecated=True)
+async def generate_dia_ban_alias(birth_info: BirthInfoRequest):
+    """Deprecated: use `/chart/earth-plate`."""
+    return await generate_earth_plate(birth_info)
+
+
+@app.post("/chart/generate", response_model=ChartResponse, tags=["Chart"])
 async def generate_chart(birth_info: BirthInfoRequest):
-    """
-    Generate Complete Tử Vi Chart (紫微斗數)
-    
-    This endpoint generates a complete Vietnamese astrological chart including:
-    
-    **Chart Components:**
-    * 📅 Lunar calendar conversion
-    * 🔢 Can Chi (Heavenly Stems & Earthly Branches)
-    * 🏠 12 Palaces (Thập Nhị Cung) with detailed information
-    * ⭐ Star positions and qualities
-    * 🎯 Life Palace (Cung Mệnh) analysis
-    * 🌟 Main stars (Chính tinh) placement
-    * ✨ Supporting stars (Phụ tinh) placement
-    
-    **Request Body Example:**
-    ```json
-    {
-        "ngay": 15,
-        "thang": 8,
-        "nam": 1990,
-        "gio": 7,
-        "gioi_tinh": 1,
-        "duong_lich": true,
-        "timezone": 7,
-        "ten": "Nguyễn Văn A"
-    }
-    ```
-    
-    **Returns:**
-    * Complete chart with all astrological information
-    * Birth info, lunar date, Can Chi, and Dia Ban
-    * Timestamp of generation
-    
-    **Note:**
-    * `gio`: Hour in Vietnamese zodiac (1=Tý, 2=Sửu, ..., 12=Hợi)
-    * `gioi_tinh`: 1 for male, -1 for female
-    * Chart calculation uses traditional Vietnamese Tử Vi algorithms
-    """
     try:
-        start_time = time.time()
-        
+        start = time.time()
         chart = TuViService.generate_full_chart(birth_info)
-        
-        elapsed = time.time() - start_time
-        print(f"⏱️  Chart generated in {elapsed:.3f}s for {birth_info.ten or 'unnamed'}")
-        
+        print(f"Chart generated in {time.time() - start:.3f}s")
         return chart
-        
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid input data: {str(e)}"
-        )
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error generating chart: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-# Additional utility endpoints
-@app.get(
-    "/info/gio-chi",
-    summary="Get hour zodiac info",
-    description="Get Vietnamese zodiac hour information",
-    tags=["Info"]
-)
-async def get_gio_chi_info():
-    """Get Vietnamese zodiac hour (Địa Chi) information"""
-    from lasotuvi.AmDuong import diaChi
-    
-    gio_info = []
-    for i in range(1, 13):
-        gio_info.append({
-            "id": i,
-            "ten": diaChi[i]['tenChi'],
-            "time_range": f"{(i-1)*2+23}h-{(i-1)*2+1}h" if i == 1 
-                         else f"{(i-1)*2-1}h-{(i-1)*2+1}h"
-        })
-    
-    return {
-        "title": "Địa Chi - Vietnamese Zodiac Hours",
-        "description": "12 traditional time periods in Vietnamese astrology",
-        "hours": gio_info
-    }
-
-
-@app.post(
-    "/chart/analyze",
-    response_model=ChartAnalysisResponse,
-    summary="Analyze Chart",
-    description="Generate detailed analysis of a Tử Vi chart with interpretations",
-    tags=["Chart", "Analysis"]
-)
+@app.post("/chart/analyze", response_model=ChartAnalysisResponse, tags=["Chart", "Analysis"])
 async def analyze_chart(birth_info: BirthInfoRequest):
-    """
-    Analyze a Tử Vi chart with detailed interpretations
-    
-    This endpoint provides in-depth analysis including:
-    - Life Palace (Cung Mệnh) analysis
-    - Career Palace (Quan Lộc) analysis  
-    - Wealth Palace (Tài Bạch) analysis
-    - Overall chart strength
-    - Lucky/Unlucky elements
-    - Major life events predictions
-    
-    **Note:** This is a basic analysis. Full interpretation requires expert knowledge.
-    """
     try:
-        analysis = TuViService.analyze_chart(birth_info)
-        return analysis
+        return TuViService.analyze_chart(birth_info)
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error analyzing chart: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@app.post(
-    "/chart/batch",
-    response_model=BatchChartResponse,
-    summary="Generate Multiple Charts",
-    description="Generate multiple charts in one request (max 10)",
-    tags=["Chart", "Batch"]
-)
+@app.post("/chart/batch", response_model=BatchChartResponse, tags=["Chart", "Batch"])
 async def generate_batch_charts(batch_request: BatchChartRequest):
-    """
-    Generate multiple charts in batch
-    
-    **Limitations:**
-    * Maximum 10 charts per request
-    * Failed charts will be included in results with error details
-    
-    **Use case:**
-    * Generate charts for family members
-    * Compare multiple birth dates
-    * Bulk chart generation
-    """
     results = []
-    successful = 0
-    failed = 0
-    
+    successful = failed = 0
     for birth_info in batch_request.charts:
         try:
-            chart = TuViService.generate_full_chart(birth_info)
-            results.append(chart)
+            results.append(TuViService.generate_full_chart(birth_info))
             successful += 1
         except Exception as e:
-            results.append(ErrorResponse(
-                error="Chart generation failed",
-                detail=str(e)
-            ))
+            results.append(ErrorResponse(error="Chart generation failed", detail=str(e)))
             failed += 1
-    
     return BatchChartResponse(
         total=len(batch_request.charts),
         successful=successful,
         failed=failed,
-        results=results
+        results=results,
     )
 
 
-@app.get(
-    "/info/elements",
-    summary="Get Five Elements Info",
-    description="Get information about Wu Xing (Five Elements)",
-    tags=["Info"]
-)
+@app.get("/info/hour-branches", tags=["Info"])
+async def get_hour_branches():
+    return TuViService.get_hour_branch_info()
+
+
+@app.get("/info/gio-chi", tags=["Info"], deprecated=True)
+async def get_gio_chi_alias():
+    """Deprecated: use `/info/hour-branches`."""
+    return TuViService.get_hour_branch_info()
+
+
+@app.get("/info/stars", response_model=StarCatalogResponse, tags=["Info"])
+async def get_star_catalog():
+    return TuViService.get_star_catalog()
+
+
+@app.get("/info/sao", response_model=StarCatalogResponse, tags=["Info"], deprecated=True)
+async def get_sao_alias():
+    """Deprecated: use `/info/stars`."""
+    return TuViService.get_star_catalog()
+
+
+@app.get("/info/elements", tags=["Info"])
 async def get_elements_info():
-    """Get Five Elements (Ngũ Hành) information"""
-    from lasotuvi.AmDuong import nguHanh as get_ngu_hanh
-    
+    from lasotuvi.stem_branch import five_element
+
     elements = []
-    for key, name in [('K', 'Kim'), ('M', 'Moc'), ('T', 'Thuy'), ('H', 'Hoa'), ('O', 'Tho')]:
-        elem = get_ngu_hanh(key)
-        elements.append({
-            "id": elem['id'],
-            "key": key,
-            "name": elem['tenHanh'],
-            "cuc": elem['cuc'],
-            "ten_cuc": elem['tenCuc']
-        })
-    
+    for key in ("K", "M", "T", "H", "O"):
+        elem = five_element(key)
+        elements.append(
+            {
+                "id": elem["id"],
+                "key": key,
+                "name": elem["element_name"],
+                "bureau": elem["bureau"],
+                "bureau_name": elem["bureau_name"],
+            }
+        )
     return {
-        "title": "Ngũ Hành - Five Elements",
-        "description": "The five elements in Vietnamese astrology",
+        "title": "Five Elements (Ngũ Hành)",
         "elements": elements,
         "cycle": {
-            "generation": "Mộc → Hỏa → Thổ → Kim → Thủy → Mộc",
-            "destruction": "Mộc → Thổ → Thủy → Hỏa → Kim → Mộc"
-        }
-    }
-
-
-@app.get(
-    "/info/can-chi",
-    summary="Get Can Chi Info",
-    description="Get information about Heavenly Stems and Earthly Branches",
-    tags=["Info"]
-)
-async def get_can_chi_info():
-    """Get Can Chi (Thiên Can Địa Chi) information"""
-    from lasotuvi.AmDuong import thienCan, diaChi
-    
-    can_list = []
-    for i in range(1, 11):
-        can = thienCan[i] if i < len(thienCan) else {}
-        can_list.append({
-            "id": i,
-            "name": can.get('tenCan', '') if isinstance(can, dict) else '',
-            "element": can.get('nguHanh', '') if isinstance(can, dict) else ''
-        })
-    
-    chi_list = []
-    for i in range(1, 13):
-        chi = diaChi[i] if i < len(diaChi) else {}
-        chi_list.append({
-            "id": i,
-            "name": chi.get('tenChi', '') if isinstance(chi, dict) else '',
-            "zodiac": chi.get('con', '') if isinstance(chi, dict) else '',
-            "element": chi.get('nguHanh', '') if isinstance(chi, dict) else ''
-        })
-    
-    return {
-        "title": "Thiên Can Địa Chi",
-        "description": "Heavenly Stems and Earthly Branches",
-        "thien_can": {
-            "count": 10,
-            "items": can_list
+            "generation": "Wood → Fire → Earth → Metal → Water → Wood",
+            "control": "Wood → Earth → Water → Fire → Metal → Wood",
         },
-        "dia_chi": {
-            "count": 12,
-            "items": chi_list
-        }
     }
 
 
-@app.get(
-    "/stats",
-    summary="API Statistics",
-    description="Get API usage statistics",
-    tags=["Info"]
-)
+@app.get("/info/stem-branch", tags=["Info"])
+async def get_stem_branch_info():
+    from lasotuvi.stem_branch import EARTHLY_BRANCHES, HEAVENLY_STEMS
+
+    stems = [
+        {
+            "id": i,
+            "name": HEAVENLY_STEMS[i]["stem_name"],
+            "element": HEAVENLY_STEMS[i].get("nguHanh") or HEAVENLY_STEMS[i].get("element"),
+        }
+        for i in range(1, 11)
+    ]
+    # fix element key after rename
+    stems = []
+    for i in range(1, 11):
+        can = HEAVENLY_STEMS[i]
+        stems.append(
+            {
+                "id": i,
+                "name": can["stem_name"],
+                "element": can.get("five_element"),
+            }
+        )
+    branches = []
+    for i in range(1, 13):
+        chi = EARTHLY_BRANCHES[i]
+        branches.append(
+            {
+                "id": i,
+                "name": chi["branch_name"],
+                "life_master": chi.get("life_master"),
+                "body_master": chi.get("body_master"),
+                "element": chi.get("element_name"),
+            }
+        )
+    return {
+        "title": "Heavenly Stems & Earthly Branches",
+        "heavenly_stems": {"count": 10, "items": stems},
+        "earthly_branches": {"count": 12, "items": branches},
+    }
+
+
+@app.get("/info/can-chi", tags=["Info"], deprecated=True)
+async def get_can_chi_info_alias():
+    return await get_stem_branch_info()
+
+
+@app.get("/stats", tags=["Info"])
 async def get_stats():
-    """Get API statistics"""
-    # This is a placeholder - in production, you'd track real stats
     return {
         "api_version": __version__,
         "status": "operational",
-        "endpoints": {
-            "total": 15,
-            "chart_generation": 4,
-            "calendar": 2,
-            "analysis": 1,
-            "info": 5
-        },
+        "schema": "english_v2_breaking",
         "features": [
-            "Solar to Lunar conversion",
-            "Can Chi calculation",
-            "Complete chart generation",
+            "Solar ↔ Lunar conversion",
+            "Full stem–branch",
+            "Earth plate + chart meta",
+            "Structured stars + brightness",
+            "Chart formations + palace interpretations",
+            "Monthly luck via view_year",
+            "Star catalog",
             "Chart analysis",
             "Batch processing",
-            "Five Elements info",
-            "Can Chi reference"
-        ]
+        ],
     }
 
 
 if __name__ == "__main__":
     import uvicorn
-    
-    print("🚀 Starting LasoTuVi API server...")
-    print(f"📚 API docs: http://localhost:8000/docs")
-    print(f"📖 ReDoc: http://localhost:8000/redoc")
-    
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
-        log_level="info"
-    )
+
+    uvicorn.run("api.main:app", host="0.0.0.0", port=8000, reload=True)

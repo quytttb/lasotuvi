@@ -5,12 +5,12 @@ from datetime import date
 import pytest
 from ephem import Date, Observer
 
-from lasotuvi.Lich_EPHEM import (
+from lasotuvi.ephemeris_calendar import (
     find_new_moon_between,
     find_solar_terms_between,
     when_is_sun_at_degrees_longitude,
 )
-from lasotuvi.Lich_HND import S2L as S2L_bak
+from lasotuvi.lunar_calendar import solar_to_lunar as solar_to_lunar_hnd
 
 calendar_table = {
     date(1991, 10, 24): (date(1991, 9, 17), False),
@@ -28,15 +28,15 @@ class TestLich(unittest.TestCase):
         self.solardate = date(1991, 10, 24)
 
     @pytest.mark.s2l
-    def test_S2L(self):
+    def test_solar_to_lunar(self):
         # self.lunardate = s2l(self.solardate, self.tunhien, self.timezone)
         # for solar, lunar in calendar_table.items():
         #     assert lunar == s2l(solar, self.tunhien, self.timezone)
         self.assertTrue(True)
 
     @pytest.mark.justtest
-    def test_S2L2(self):
-        S2L_bak(24, 10, 1991)
+    def test_solar_to_lunar2(self):
+        solar_to_lunar_hnd(24, 10, 1991)
         # s2l(self.solardate, self.tunhien, self.timezone)
 
     @pytest.mark.findsolarterms

@@ -71,6 +71,14 @@
   - [ ] Info pages (elements, can-chi)
   - [ ] Custom hooks (useChart, useAnalyze)
 
+### 📖 Interpretation Engine (Backend)
+* [x] `EarthPlate.get_related_palaces` — san fang si zheng frame
+* [x] `ChartAnalyzer` — detect formations + palace interpretations
+* [x] Knowledge base `lasotuvi/data/interpretations.json` (English keys)
+* [x] API fields: `formations`, `palaces[].interpretations`
+* [ ] Expand KB: đủ 14 chính tinh × 12 cung + phụ tinh then từ Tailieuthamkhao
+* [ ] Siết rule cách cục (miếu/hãm, đồng cung vs hội chiếu, Tài/Quan)
+
 ### 🔧 Code Quality & Type Safety ✅ **COMPLETED**
 * [x] **Modern Python typing (thay mypy)**
   - [x] Upgrade lên Python 3.12+ ✅

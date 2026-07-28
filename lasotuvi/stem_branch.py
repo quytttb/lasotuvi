@@ -2,221 +2,221 @@
 (c) 2016 doanguyen <dungnv2410@gmail.com>.
 """
 
-from lasotuvi.Lich_HND import L2S, S2L, jdFromDate
+from lasotuvi.lunar_calendar import lunar_to_solar, solar_to_lunar, julian_day_from_date
 
-thienCan = [
+HEAVENLY_STEMS = [
     {
         "id": 0,
-        "chuCaiDau": None,
-        "tenCan": None,
-        "nguHanh": None,
-        "nguHanhID": None,
-        "vitriDiaBan": None,
-        "amDuong": None,
+        "initial": None,
+        "stem_name": None,
+        "five_element": None,
+        "element_id": None,
+        "earth_plate_position": None,
+        "yin_yang": None,
     },
     {
         "id": 1,
-        "chuCaiDau": "G",
-        "tenCan": "Giáp",
-        "nguHanh": "M",
-        "nguHanhID": 2,
-        "vitriDiaBan": 3,
-        "amDuong": 1,
+        "initial": "G",
+        "stem_name": "Giáp",
+        "five_element": "M",
+        "element_id": 2,
+        "earth_plate_position": 3,
+        "yin_yang": 1,
     },
     {
         "id": 2,
-        "chuCaiDau": "A",
-        "tenCan": "Ất",
-        "nguHanh": "M",
-        "nguHanhID": 2,
-        "vitriDiaBan": 4,
-        "amDuong": -1,
+        "initial": "A",
+        "stem_name": "Ất",
+        "five_element": "M",
+        "element_id": 2,
+        "earth_plate_position": 4,
+        "yin_yang": -1,
     },
     {
         "id": 3,
-        "chuCaiDau": "B",
-        "tenCan": "Bính",
-        "nguHanh": "H",
-        "nguHanhID": 4,
-        "vitriDiaBan": 6,
-        "amDuong": 1,
+        "initial": "B",
+        "stem_name": "Bính",
+        "five_element": "H",
+        "element_id": 4,
+        "earth_plate_position": 6,
+        "yin_yang": 1,
     },
     {
         "id": 4,
-        "chuCaiDau": "D",
-        "tenCan": "Đinh",
-        "nguHanh": "H",
-        "nguHanhID": 4,
-        "vitriDiaBan": 7,
-        "amDuong": -1,
+        "initial": "D",
+        "stem_name": "Đinh",
+        "five_element": "H",
+        "element_id": 4,
+        "earth_plate_position": 7,
+        "yin_yang": -1,
     },
     {
         "id": 5,
-        "chuCaiDau": "M",
-        "tenCan": "Mậu",
-        "nguHanh": "O",
-        "nguHanhID": 5,
-        "vitriDiaBan": 6,
-        "amDuong": 1,
+        "initial": "M",
+        "stem_name": "Mậu",
+        "five_element": "O",
+        "element_id": 5,
+        "earth_plate_position": 6,
+        "yin_yang": 1,
     },
     {
         "id": 6,
-        "chuCaiDau": "K",
-        "tenCan": "Kỷ",
-        "nguHanh": "O",
-        "nguHanhID": 5,
-        "vitriDiaBan": 7,
-        "amDuong": -1,
+        "initial": "K",
+        "stem_name": "Kỷ",
+        "five_element": "O",
+        "element_id": 5,
+        "earth_plate_position": 7,
+        "yin_yang": -1,
     },
     {
         "id": 7,
-        "chuCaiDau": "C",
-        "tenCan": "Canh",
-        "nguHanh": "K",
-        "nguHanhID": 1,
-        "vitriDiaBan": 9,
-        "amDuong": 1,
+        "initial": "C",
+        "stem_name": "Canh",
+        "five_element": "K",
+        "element_id": 1,
+        "earth_plate_position": 9,
+        "yin_yang": 1,
     },
     {
         "id": 8,
-        "chuCaiDau": "T",
-        "tenCan": "Tân",
-        "nguHanh": "K",
-        "nguHanhID": 1,
-        "vitriDiaBan": 10,
-        "amDuong": -1,
+        "initial": "T",
+        "stem_name": "Tân",
+        "five_element": "K",
+        "element_id": 1,
+        "earth_plate_position": 10,
+        "yin_yang": -1,
     },
     {
         "id": 9,
-        "chuCaiDau": "N",
-        "tenCan": "Nhâm",
-        "nguHanh": "T",
-        "nguHanhID": 3,
-        "vitriDiaBan": 12,
-        "amDuong": 1,
+        "initial": "N",
+        "stem_name": "Nhâm",
+        "five_element": "T",
+        "element_id": 3,
+        "earth_plate_position": 12,
+        "yin_yang": 1,
     },
     {
         "id": 10,
-        "chuCaiDau": "Q",
-        "tenCan": "Quý",
-        "nguHanh": "T",
-        "nguHanhID": 3,
-        "vitriDiaBan": 1,
-        "amDuong": -1,
+        "initial": "Q",
+        "stem_name": "Quý",
+        "five_element": "T",
+        "element_id": 3,
+        "earth_plate_position": 1,
+        "yin_yang": -1,
     },
 ]
 
 
-diaChi = [
-    {"id": 0, "tenChi": "Hem có", "tenHanh": ":D", "amDuong": 0},
+EARTHLY_BRANCHES = [
+    {"id": 0, "branch_name": "Hem có", "element_name": ":D", "yin_yang": 0},
     {
         "id": 1,
-        "tenChi": "Tý",
-        "tenHanh": "T",
-        "menhChu": "Tham lang",
-        "thanChu": "Linh tinh",
-        "amDuong": 1,
+        "branch_name": "Tý",
+        "element_name": "T",
+        "life_master": "Tham lang",
+        "body_master": "Linh tinh",
+        "yin_yang": 1,
     },
     {
         "id": 2,
-        "tenChi": "Sửu",
-        "tenHanh": "O",
-        "menhChu": "Cự môn",
-        "thanChu": "Thiên tướng",
-        "amDuong": -1,
+        "branch_name": "Sửu",
+        "element_name": "O",
+        "life_master": "Cự môn",
+        "body_master": "Thiên tướng",
+        "yin_yang": -1,
     },
     {
         "id": 3,
-        "tenChi": "Dần",
-        "tenHanh": "M",
-        "menhChu": "Lộc tồn",
-        "thanChu": "Thiên lương",
-        "amDuong": 1,
+        "branch_name": "Dần",
+        "element_name": "M",
+        "life_master": "Lộc tồn",
+        "body_master": "Thiên lương",
+        "yin_yang": 1,
     },
     {
         "id": 4,
-        "tenChi": "Mão",
-        "tenHanh": "M",
-        "menhChu": "Văn khúc",
-        "thanChu": "Thiên đồng",
-        "amDuong": -1,
+        "branch_name": "Mão",
+        "element_name": "M",
+        "life_master": "Văn khúc",
+        "body_master": "Thiên đồng",
+        "yin_yang": -1,
     },
     {
         "id": 5,
-        "tenChi": "Thìn",
-        "tenHanh": "O",
-        "menhChu": "Liêm trinh",
-        "thanChu": "Văn xương",
-        "amDuong": 1,
+        "branch_name": "Thìn",
+        "element_name": "O",
+        "life_master": "Liêm trinh",
+        "body_master": "Văn xương",
+        "yin_yang": 1,
     },
     {
         "id": 6,
-        "tenChi": "Tỵ",
-        "tenHanh": "H",
-        "menhChu": "Vũ khúc",
-        "thanChu": "Thiên cơ",
-        "amDuong": -1,
+        "branch_name": "Tỵ",
+        "element_name": "H",
+        "life_master": "Vũ khúc",
+        "body_master": "Thiên cơ",
+        "yin_yang": -1,
     },
     {
         "id": 7,
-        "tenChi": "Ngọ",
-        "tenHanh": "H",
-        "menhChu": "Phá quân",
-        "thanChu": "Hỏa tinh",
-        "amDuong": 1,
+        "branch_name": "Ngọ",
+        "element_name": "H",
+        "life_master": "Phá quân",
+        "body_master": "Hỏa tinh",
+        "yin_yang": 1,
     },
     {
         "id": 8,
-        "tenChi": "Mùi",
-        "tenHanh": "O",
-        "menhChu": "Vũ khúc",
-        "thanChu": "Thiên tướng",
-        "amDuong": -1,
+        "branch_name": "Mùi",
+        "element_name": "O",
+        "life_master": "Vũ khúc",
+        "body_master": "Thiên tướng",
+        "yin_yang": -1,
     },
     {
         "id": 9,
-        "tenChi": "Thân",
-        "tenHanh": "K",
-        "menhChu": "Liêm trinh",
-        "thanChu": "Thiên lương",
-        "amDuong": 1,
+        "branch_name": "Thân",
+        "element_name": "K",
+        "life_master": "Liêm trinh",
+        "body_master": "Thiên lương",
+        "yin_yang": 1,
     },
     {
         "id": 10,
-        "tenChi": "Dậu",
-        "tenHanh": "K",
-        "menhChu": "Văn khúc",
-        "thanChu": "Thiên đồng",
-        "amDuong": -1,
+        "branch_name": "Dậu",
+        "element_name": "K",
+        "life_master": "Văn khúc",
+        "body_master": "Thiên đồng",
+        "yin_yang": -1,
     },
     {
         "id": 11,
-        "tenChi": "Tuất",
-        "tenHanh": "O",
-        "menhChu": "Lộc tồn",
-        "thanChu": "Văn xương",
-        "amDuong": 1,
+        "branch_name": "Tuất",
+        "element_name": "O",
+        "life_master": "Lộc tồn",
+        "body_master": "Văn xương",
+        "yin_yang": 1,
     },
     {
         "id": 12,
-        "tenChi": "Hợi",
-        "tenHanh": "T",
-        "menhChu": "Cự môn",
-        "thanChu": "Thiên cơ",
-        "amDuong": -1,
+        "branch_name": "Hợi",
+        "element_name": "T",
+        "life_master": "Cự môn",
+        "body_master": "Thiên cơ",
+        "yin_yang": -1,
     },
 ]
 
 
-def ngayThangNam(nn, tt, nnnn, duongLich=True, timeZone=7):
+def to_lunar_ymd(nn, tt, nnnn, is_solar=True, timezone=7):
     """Summary
 
     Args:
         nn (TYPE): ngay
         tt (TYPE): thang
         nnnn (TYPE): nam
-        duongLich (bool, optional): bool
-        timeZone (int, optional): +7 Vietnam
+        is_solar (bool, optional): bool
+        timezone (int, optional): +7 Vietnam
 
     Returns:
         TYPE: Description
@@ -224,17 +224,17 @@ def ngayThangNam(nn, tt, nnnn, duongLich=True, timeZone=7):
     Raises:
         Exception: Description
     """
-    thangNhuan = 0
+    is_leap_month = 0
     # if nnnn > 1000 and nnnn < 3000 and nn > 0 and \
     if nn > 0 and nn < 32 and tt < 13 and tt > 0:
-        if duongLich is True:
-            [nn, tt, nnnn, thangNhuan] = S2L(nn, tt, nnnn, timeZone=timeZone)
-        return [nn, tt, nnnn, thangNhuan]
+        if is_solar is True:
+            [nn, tt, nnnn, is_leap_month] = solar_to_lunar(nn, tt, nnnn, timezone=timezone)
+        return [nn, tt, nnnn, is_leap_month]
     else:
         raise Exception("Ngày, tháng, năm không chính xác.")
 
 
-def canChiNgay(nn, tt, nnnn, duongLich=True, timeZone=7, thangNhuan=False):
+def day_stem_branch(nn, tt, nnnn, is_solar=True, timezone=7, is_leap_month=False):
     """Tính Can Chi của ngày.
 
     Công thức toán học (không có trong tài liệu Tử Vi truyền thống):
@@ -249,27 +249,27 @@ def canChiNgay(nn, tt, nnnn, duongLich=True, timeZone=7, thangNhuan=False):
         nn (int): Ngày
         tt (int): Tháng
         nnnn (int): Năm
-        duongLich (bool, optional): True nếu là dương lịch, False âm lịch
-        timeZone (int, optional): Múi giờ (mặc định 7 cho Việt Nam)
-        thangNhuan (bool, optional): Có phải là tháng nhuận không?
+        is_solar (bool, optional): True nếu là dương lịch, False âm lịch
+        timezone (int, optional): Múi giờ (mặc định 7 cho Việt Nam)
+        is_leap_month (bool, optional): Có phải là tháng nhuận không?
 
     Returns:
-        list: [canNgay, chiNgay] - Can và Chi của ngày (1-10, 1-12)
+        list: [day_stem, day_branch] - Can và Chi của ngày (1-10, 1-12)
     """
-    if duongLich is False:
-        [nn, tt, nnnn] = L2S(nn, tt, nnnn, thangNhuan, timeZone)
-    jd = jdFromDate(nn, tt, nnnn)
+    if is_solar is False:
+        [nn, tt, nnnn] = lunar_to_solar(nn, tt, nnnn, is_leap_month, timezone)
+    jd = julian_day_from_date(nn, tt, nnnn)
     # Công thức tính Can Chi từ số ngày Julian
-    canNgay = (jd + 9) % 10 + 1
-    chiNgay = (jd + 1) % 12 + 1
-    return [canNgay, chiNgay]
+    day_stem = (jd + 9) % 10 + 1
+    day_branch = (jd + 1) % 12 + 1
+    return [day_stem, day_branch]
 
 
-def canChiGio(canNgay, gio):
+def hour_stem_branch(day_stem, gio):
     """Phần này có lẽ chưa cần thiết và sẽ bổ sung sau.
 
     Args:
-        canNgay (int): Can của ngày cần xem, 1: Giáp, 2: Ất, 3: Bính,...
+        day_stem (int): Can của ngày cần xem, 1: Giáp, 2: Ất, 3: Bính,...
         gio (int): Chi của giờ, 1: Tý, 2: Sửu,...
 
     Returns:
@@ -278,7 +278,7 @@ def canChiGio(canNgay, gio):
     return False
 
 
-def ngayThangNamCanChi(nn, tt, nnnn, duongLich=True, timeZone=7):
+def month_year_stem_branch(nn, tt, nnnn, is_solar=True, timezone=7):
     """Chuyển đổi năm, tháng âm/dương lịch sang Can Chi.
 
     Công thức toán học (không có trong tài liệu Tử Vi truyền thống):
@@ -286,7 +286,7 @@ def ngayThangNamCanChi(nn, tt, nnnn, duongLich=True, timeZone=7):
     - Can năm = (năm + 6) % 10 + 1
     - Chi năm = (năm + 8) % 12 + 1
 
-    Lưu ý: Để tính Can Chi ngày, dùng hàm canChiNgay() vì cần chuyển đổi
+    Lưu ý: Để tính Can Chi ngày, dùng hàm day_stem_branch() vì cần chuyển đổi
     qua số ngày Julian.
 
     Tài liệu Tử Vi: Chỉ đề cập cách phối hợp Can Chi theo chu kỳ 60 năm
@@ -296,27 +296,27 @@ def ngayThangNamCanChi(nn, tt, nnnn, duongLich=True, timeZone=7):
         nn (int): Ngày
         tt (int): Tháng
         nnnn (int): Năm
-        duongLich (bool, optional): True nếu là dương lịch, False âm lịch
-        timeZone (int, optional): Múi giờ
+        is_solar (bool, optional): True nếu là dương lịch, False âm lịch
+        timezone (int, optional): Múi giờ
 
     Returns:
-        list: [canThang, canNam, chiNam]
+        list: [month_stem, year_stem, year_branch]
     """
-    if duongLich is True:
-        [nn, tt, nnnn, thangNhuan] = ngayThangNam(nn, tt, nnnn, timeZone=timeZone)
+    if is_solar is True:
+        [nn, tt, nnnn, is_leap_month] = to_lunar_ymd(nn, tt, nnnn, timezone=timezone)
     # Can của tháng
-    canThang = (nnnn * 12 + tt + 3) % 10 + 1
+    month_stem = (nnnn * 12 + tt + 3) % 10 + 1
     # Can chi của năm
-    canNamSinh = (nnnn + 6) % 10 + 1
-    chiNam = (nnnn + 8) % 12 + 1
+    birth_year_stem = (nnnn + 6) % 10 + 1
+    year_branch = (nnnn + 8) % 12 + 1
 
-    return [canThang, canNamSinh, chiNam]
+    return [month_stem, birth_year_stem, year_branch]
 
 
-def nguHanh(tenHanh):
+def five_element(element_name):
     """
     Args:
-        tenHanh (string): Tên Hành trong ngũ hành, Kim hoặc K, Moc hoặc M,
+        element_name (string): Tên Hành trong ngũ hành, Kim hoặc K, Moc hoặc M,
         Thuy hoặc T, Hoa hoặc H, Tho hoặc O
 
     Returns:
@@ -325,16 +325,16 @@ def nguHanh(tenHanh):
     Raises:
         Exception: Description
     """
-    if tenHanh in ["Kim", "K"]:
-        return {"id": 1, "tenHanh": "Kim", "cuc": 4, "tenCuc": "Kim tứ Cục", "css": "hanhKim"}
-    elif tenHanh == "Moc" or tenHanh == "M":
-        return {"id": 2, "tenHanh": "Mộc", "cuc": 3, "tenCuc": "Mộc tam Cục", "css": "hanhMoc"}
-    elif tenHanh == "Thuy" or tenHanh == "T":
-        return {"id": 3, "tenHanh": "Thủy", "cuc": 2, "tenCuc": "Thủy nhị Cục", "css": "hanhThuy"}
-    elif tenHanh == "Hoa" or tenHanh == "H":
-        return {"id": 4, "tenHanh": "Hỏa", "cuc": 6, "tenCuc": "Hỏa lục Cục", "css": "hanhHoa"}
-    elif tenHanh == "Tho" or tenHanh == "O":
-        return {"id": 5, "tenHanh": "Thổ", "cuc": 5, "tenCuc": "Thổ ngũ Cục", "css": "hanhTho"}
+    if element_name in ["Kim", "K"]:
+        return {"id": 1, "element_name": "Kim", "bureau": 4, "bureau_name": "Kim tứ Cục", "css": "hanhKim"}
+    elif element_name == "Moc" or element_name == "M":
+        return {"id": 2, "element_name": "Mộc", "bureau": 3, "bureau_name": "Mộc tam Cục", "css": "hanhMoc"}
+    elif element_name == "Thuy" or element_name == "T":
+        return {"id": 3, "element_name": "Thủy", "bureau": 2, "bureau_name": "Thủy nhị Cục", "css": "hanhThuy"}
+    elif element_name == "Hoa" or element_name == "H":
+        return {"id": 4, "element_name": "Hỏa", "bureau": 6, "bureau_name": "Hỏa lục Cục", "css": "hanhHoa"}
+    elif element_name == "Tho" or element_name == "O":
+        return {"id": 5, "element_name": "Thổ", "bureau": 5, "bureau_name": "Thổ ngũ Cục", "css": "hanhTho"}
     else:
         raise Exception(
             "Tên Hành phải thuộc Kim (K), Mộc (M), Thủy (T), \
@@ -342,16 +342,16 @@ def nguHanh(tenHanh):
         )
 
 
-def sinhKhac(hanh1, hanh2):
+def generation_control(element_a, element_b):
     """
     Args:
-        hanh1 (TYPE): Description
-        hanh2 (TYPE): Description
+        element_a (TYPE): Description
+        element_b (TYPE): Description
 
     Returns:
         TYPE: Description
     """
-    matranSinhKhac = [
+    GENERATION_CONTROL_MATRIX = [
         [None, None, None, None, None, None],
         [None, 0, -1, 1, -1j, 1j],
         [None, -1j, 0, 1j, 1, -1],
@@ -359,20 +359,20 @@ def sinhKhac(hanh1, hanh2):
         [None, -1, 1j, -1j, 0, 1],
         [None, 1, -1j, -1, 1j, 0],
     ]
-    return matranSinhKhac[hanh1][hanh2]
+    return GENERATION_CONTROL_MATRIX[element_a][element_b]
 
 
-def nguHanhNapAm(diaChi, thienCan, xuatBanMenh=False):
+def nayin_element(branch: int, stem: int, as_natal_name=False):
     """Sử dụng Ngũ Hành nạp âm để tính Hành của năm.
 
     Args:
-        diaChi (integer): Số thứ tự của địa chi (Tý=1, Sửu=2,...)
-        thienCan (integer): Số thứ tự của thiên can (Giáp=1, Ất=2,...)
+        branch (int): Earthly branch index (Zi=1 ... Hai=12)
+        stem (int): Heavenly stem index (Jia=1 ... Gui=10)
 
     Returns:
         Trả về chữ viết tắt Hành của năm (K, T, H, O, M)
     """
-    banMenh = {
+    natal_element_name = {
         "K1": "HẢI TRUNG KIM",
         "T1": "GIÁNG HẠ THỦY",
         "H1": "TÍCH LỊCH HỎA",
@@ -420,38 +420,38 @@ def nguHanhNapAm(diaChi, thienCan, xuatBanMenh=False):
         [12, False, "H6", False, "O6", False, "M6", False, "K6", False, "T6"],
     ]
     try:
-        nh = matranNapAm[diaChi][thienCan]
+        nh = matranNapAm[branch][stem]
         if nh[0] in ["K", "M", "T", "H", "O"]:
-            if xuatBanMenh is True:
-                return banMenh[nh]
+            if as_natal_name is True:
+                return natal_element_name[nh]
             else:
                 return nh[0]
     except (KeyError, IndexError) as e:
-        raise Exception(nguHanhNapAm.__doc__) from e
+        raise Exception(nayin_element.__doc__) from e
 
 
-def dichCung(cungBanDau, *args):
+def shift_palace(start_palace, *args):
     """Dịch chuyển cung theo số bước.
 
     Theo tài liệu Tử Vi:
     Dùng để tính vị trí các cung và sao bằng cách dịch chuyển từ vị trí ban đầu.
 
     Args:
-        cungBanDau (int): Vị trí cung ban đầu (1-12)
+        start_palace (int): Vị trí cung ban đầu (1-12)
         *args: Các số bước cần dịch (có thể âm hoặc dương)
 
     Returns:
         int: Vị trí cung sau khi dịch (1-12)
     """
-    cungSauKhiDich = int(cungBanDau)
+    shifted_palace = int(start_palace)
     for soCungDich in args:
-        cungSauKhiDich += int(soCungDich)
-    if cungSauKhiDich % 12 == 0:  # Sửa 'is' thành '==' (SyntaxWarning)
+        shifted_palace += int(soCungDich)
+    if shifted_palace % 12 == 0:  # Sửa 'is' thành '==' (SyntaxWarning)
         return 12
-    return cungSauKhiDich % 12
+    return shifted_palace % 12
 
 
-def khoangCachCung(cung1, cung2, chieu=1):
+def palace_distance(cung1, cung2, chieu=1):
     """Tính khoảng cách giữa 2 cung.
 
     Args:
@@ -468,7 +468,7 @@ def khoangCachCung(cung1, cung2, chieu=1):
         return (cung2 - cung1 + 12) % 12
 
 
-def timCuc(viTriCungMenhTrenDiaBan, canNamSinh):
+def find_element_bureau(life_palace_index, birth_year_stem):
     """Tìm Cục (Ngũ Hành Cục) theo cung Mệnh và Can năm sinh.
 
     Theo tài liệu Tử Vi:
@@ -482,20 +482,20 @@ def timCuc(viTriCungMenhTrenDiaBan, canNamSinh):
     3. Xác định Ngũ Hành Cục: Thủy nhị (2), Mộc tam (3), Kim tứ (4), Thổ ngũ (5), Hỏa lục (6)
 
     Args:
-        viTriCungMenhTrenDiaBan (int): Vị trí cung Mệnh (1-12)
-        canNamSinh (int): Can của năm sinh (1-10)
+        life_palace_index (int): Vị trí cung Mệnh (1-12)
+        birth_year_stem (int): Can của năm sinh (1-10)
 
     Returns:
         str: Tên Ngũ Hành Nạp Âm của cục
     """
-    canThangGieng = (canNamSinh * 2 + 1) % 10
-    canThangMenh = ((viTriCungMenhTrenDiaBan - 3) % 12 + canThangGieng) % 10
-    if canThangMenh == 0:
-        canThangMenh = 10
-    return nguHanhNapAm(viTriCungMenhTrenDiaBan, canThangMenh)
+    first_month_stem = (birth_year_stem * 2 + 1) % 10
+    life_month_stem = ((life_palace_index - 3) % 12 + first_month_stem) % 10
+    if life_month_stem == 0:
+        life_month_stem = 10
+    return nayin_element(life_palace_index, life_month_stem)
 
 
-def timTuVi(cuc, ngaySinhAmLich):
+def find_zi_wei_position(cuc, ngaySinhAmLich):
     """Tìm vị trí sao Tử Vi theo Cục và ngày sinh âm lịch.
 
     Theo tài liệu Tử Vi (Thơ của Bạch Ngọc Thiềm tiên sinh):
@@ -520,19 +520,19 @@ def timTuVi(cuc, ngaySinhAmLich):
         Exception: Nếu cục không hợp lệ
     """
     cungDan = 3  # Vị trí cung Dần ban đầu là 3
-    cucBanDau = cuc
+    initial_bureau = cuc
     if cuc not in [2, 3, 4, 5, 6]:  # Tránh trường hợp infinite loop
         raise Exception("Số cục phải là 2, 3, 4, 5, 6")
     while cuc < ngaySinhAmLich:
-        cuc += cucBanDau
+        cuc += initial_bureau
         cungDan += 1  # Dịch vị trí cung Dần
     saiLech = cuc - ngaySinhAmLich
     if saiLech % 2 == 1:  # Sửa 'is' thành '==' (SyntaxWarning)
         saiLech = -saiLech  # Nếu sai lệch là chẵn thì tiến, lẻ thì lùi
-    return dichCung(cungDan, saiLech)
+    return shift_palace(cungDan, saiLech)
 
 
-def timTrangSinh(cucSo):
+def find_growth_stage_start(bureau):
     """Tìm vị trí sao Tràng Sinh theo số Cục.
 
     Theo tài liệu Tử Vi:
@@ -550,7 +550,7 @@ def timTrangSinh(cucSo):
     - Nữ: Đếm nghịch (ngược chiều kim đồng hồ)
 
     Args:
-        cucSo (int): Số cục (2, 3, 4, 5, 6)
+        bureau (int): Số cục (2, 3, 4, 5, 6)
 
     Returns:
         int: Vị trí cung của sao Tràng Sinh (3, 6, 9, hoặc 12)
@@ -558,20 +558,20 @@ def timTrangSinh(cucSo):
     Raises:
         Exception: Nếu số cục không hợp lệ
     """
-    if cucSo == 6:  # Hỏa lục cục
+    if bureau == 6:  # Hỏa lục cục
         return 3  # Tràng sinh ở Dần
-    elif cucSo == 4:  # Kim tứ cục
+    elif bureau == 4:  # Kim tứ cục
         return 6  # Tràng sinh ở Tỵ
-    elif cucSo == 2 or cucSo == 5:  # Thủy nhị cục, Thổ ngũ cục
+    elif bureau == 2 or bureau == 5:  # Thủy nhị cục, Thổ ngũ cục
         return 9  # Tràng sinh ở Thân
-    elif cucSo == 3:  # Mộc tam cục
+    elif bureau == 3:  # Mộc tam cục
         return 12  # Tràng sinh ở Hợi
     else:
-        # print cucSo
+        # print bureau
         raise Exception("Không tìm được cung an sao Trường sinh")
 
 
-def timHoaLinh(chiNamSinh, gioSinh, gioiTinh, amDuongNamSinh):
+def find_fire_bell_positions(birth_year_branch, birth_hour_label, gender, year_stem_yin_yang):
     """Tìm vị trí sao Hỏa Tinh và Linh Tinh.
 
     Theo tài liệu Tử Vi:
@@ -586,42 +586,42 @@ def timHoaLinh(chiNamSinh, gioSinh, gioiTinh, amDuongNamSinh):
     - Linh Tinh: Tính ngược đến giờ sinh (nếu Dương nam/Âm nữ)
 
     Args:
-        chiNamSinh (int): Chi năm sinh (1-12)
-        gioSinh (int): Giờ sinh (1-12)
-        gioiTinh (int): 1 = Nam, -1 = Nữ
-        amDuongNamSinh (int): 1 = Dương, -1 = Âm
+        birth_year_branch (int): Chi năm sinh (1-12)
+        birth_hour_label (int): Giờ sinh (1-12)
+        gender (int): 1 = Nam, -1 = Nữ
+        year_stem_yin_yang (int): 1 = Dương, -1 = Âm
 
     Returns:
         list: [viTriHoaTinh, viTriLinhTinh]
     """
     # Xác định cung khởi đầu theo nhóm chi năm
-    if chiNamSinh in [3, 7, 11]:  # Dần, Ngọ, Tuất
+    if birth_year_branch in [3, 7, 11]:  # Dần, Ngọ, Tuất
         khoiCungHoaTinh = 2
         khoiCungLinhTinh = 4
-    elif chiNamSinh in [1, 5, 9]:  # Tý, Thìn, Thân
+    elif birth_year_branch in [1, 5, 9]:  # Tý, Thìn, Thân
         khoiCungHoaTinh = 3
         khoiCungLinhTinh = 11
-    elif chiNamSinh in [6, 10, 2]:  # Tị, Dậu, Sửu
+    elif birth_year_branch in [6, 10, 2]:  # Tị, Dậu, Sửu
         khoiCungHoaTinh = 11
         khoiCungLinhTinh = 4
-    elif chiNamSinh in [12, 4, 8]:  # Hợi, Mão, Mùi
+    elif birth_year_branch in [12, 4, 8]:  # Hợi, Mão, Mùi
         khoiCungHoaTinh = 10
         khoiCungLinhTinh = 11
     else:
         raise Exception("Không thể khởi cung tìm Hỏa-Linh")
 
     # Tính vị trí theo âm dương nam nữ
-    if (gioiTinh * amDuongNamSinh) == -1:  # Âm nam hoặc Dương nữ
-        viTriHoaTinh = dichCung(khoiCungHoaTinh + 1, (-1) * gioSinh)
-        viTriLinhTinh = dichCung(khoiCungLinhTinh - 1, gioSinh)
-    elif (gioiTinh * amDuongNamSinh) == 1:  # Dương nam hoặc Âm nữ
-        viTriHoaTinh = dichCung(khoiCungHoaTinh - 1, gioSinh)
-        viTriLinhTinh = dichCung(khoiCungLinhTinh + 1, (-1) * gioSinh)
+    if (gender * year_stem_yin_yang) == -1:  # Âm nam hoặc Dương nữ
+        viTriHoaTinh = shift_palace(khoiCungHoaTinh + 1, (-1) * birth_hour_label)
+        viTriLinhTinh = shift_palace(khoiCungLinhTinh - 1, birth_hour_label)
+    elif (gender * year_stem_yin_yang) == 1:  # Dương nam hoặc Âm nữ
+        viTriHoaTinh = shift_palace(khoiCungHoaTinh - 1, birth_hour_label)
+        viTriLinhTinh = shift_palace(khoiCungLinhTinh + 1, (-1) * birth_hour_label)
 
     return [viTriHoaTinh, viTriLinhTinh]
 
 
-def timThienKhoi(canNam):
+def find_tian_kui(year_stem):
     """Tìm vị trí sao Thiên Khôi và Thiên Việt.
 
     Theo tài liệu Tử Vi:
@@ -634,19 +634,19 @@ def timThienKhoi(canNam):
     - ...và các Can còn lại
 
     Args:
-        canNam (int): Can của năm sinh (1-10)
+        year_stem (int): Can của năm sinh (1-10)
 
     Returns:
         int: Vị trí cung của sao Thiên Khôi
     """
     khoiViet = [None, 2, 1, 12, 10, 8, 1, 8, 7, 6, 4]
     try:
-        return khoiViet[canNam]
+        return khoiViet[year_stem]
     except IndexError as e:
         raise Exception("Không tìm được vị trí Khôi-Việt") from e
 
 
-def timThienQuanThienPhuc(canNam):
+def find_tian_guan_tian_fu(year_stem):
     """Tìm vị trí sao Thiên Quan và Thiên Phúc.
 
     Theo tài liệu Tử Vi:
@@ -659,7 +659,7 @@ def timThienQuanThienPhuc(canNam):
     Lưu ý: Kết hợp với Thanh Long, Hóa Khoa → "Đệ nhất Giải Thần"
 
     Args:
-        canNam (int): Can của năm sinh (1-10)
+        year_stem (int): Can của năm sinh (1-10)
 
     Returns:
         list: [viTriThienQuan, viTriThienPhuc]
@@ -674,24 +674,24 @@ def timThienQuanThienPhuc(canNam):
     # Tân quý phùng xà phúc lộc nhiêu
     thienPhuc = [None, 10, 9, 1, 12, 4, 3, 7, 6, 7, 6]
     try:
-        return thienQuan[canNam], thienPhuc[canNam]
+        return thienQuan[year_stem], thienPhuc[year_stem]
     except IndexError as e:
         raise Exception("Không tìm được Quan-Phúc") from e
 
 
-def timCoThan(chiNam):
-    if chiNam in [12, 1, 2]:
+def find_gu_shen(year_branch):
+    if year_branch in [12, 1, 2]:
         return 3
-    elif chiNam in [3, 4, 5]:
+    elif year_branch in [3, 4, 5]:
         return 6
-    elif chiNam in [6, 7, 8]:
+    elif year_branch in [6, 7, 8]:
         return 9
     else:
         return 12
 
 
-def timThienMa(chiNam):
-    demNghich = chiNam % 4
+def find_tian_ma(year_branch):
+    demNghich = year_branch % 4
     if demNghich == 1:
         return 3
     elif demNghich == 2:
@@ -704,8 +704,8 @@ def timThienMa(chiNam):
         raise Exception("Không tìm được Thiên mã")
 
 
-def timPhaToai(chiNam):
-    demNghich = chiNam % 3
+def find_po_sui(year_branch):
+    demNghich = year_branch % 3
     if demNghich == 0:
         return 6
     elif demNghich == 1:
@@ -716,34 +716,34 @@ def timPhaToai(chiNam):
         raise Exception("Không tìm được Phá toái")
 
 
-def timTriet(canNam):
+def find_triet(year_stem):
     # Giáp Kỷ, Thân Dậu cung
-    if canNam in [1, 6]:
+    if year_stem in [1, 6]:
         return 9, 10
 
     # Ất Canh, Ngọ Mùi cung
-    elif canNam in [2, 7]:
+    elif year_stem in [2, 7]:
         return 7, 8
 
     # Bính Tân, Thìn Tị cung
-    elif canNam in [3, 8]:
+    elif year_stem in [3, 8]:
         return 5, 6
 
     # Đinh Nhâm, Dần Mão cung
-    elif canNam in [4, 9]:
+    elif year_stem in [4, 9]:
         return 3, 4
 
     # Mậu Quý, Tý Sửu cung
-    elif canNam in [5, 10]:
+    elif year_stem in [5, 10]:
         return 1, 2
     else:
         raise Exception("Không tìm được Triệt")
 
 
-def timLuuTru(canNam):
+def find_luu_tru(year_stem):
     maTranLuuHa = [None, 10, 11, 8, 5, 6, 7, 9, 4, 12, 3]
     maTranThienTru = [None, 6, 7, 1, 6, 7, 9, 3, 7, 10, 11]
     try:
-        return maTranLuuHa[canNam], maTranThienTru[canNam]
+        return maTranLuuHa[year_stem], maTranThienTru[year_stem]
     except IndexError as e:
         raise Exception("Không tìm được Lưu - Trù") from e
