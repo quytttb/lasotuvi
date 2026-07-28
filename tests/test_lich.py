@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 
 import unittest
 from datetime import date
@@ -6,7 +5,11 @@ from datetime import date
 import pytest
 from ephem import Date, Observer
 
-from lasotuvi.Lich_EPHEM import s2l, find_solar_terms_between, when_is_sun_at_degrees_longitude, find_new_moon_between
+from lasotuvi.Lich_EPHEM import (
+    find_new_moon_between,
+    find_solar_terms_between,
+    when_is_sun_at_degrees_longitude,
+)
 from lasotuvi.Lich_HND import S2L as S2L_bak
 
 calendar_table = {
@@ -20,7 +23,7 @@ class TestLich(unittest.TestCase):
 
     def setUp(self):
         self.tunhien = Observer()
-        self.tunhien.lon, self.tunhien.lat = '105.83416', '21.027764'
+        self.tunhien.lon, self.tunhien.lat = "105.83416", "21.027764"
         self.timezone = 7
         self.solardate = date(1991, 10, 24)
 
@@ -39,23 +42,25 @@ class TestLich(unittest.TestCase):
     @pytest.mark.findsolarterms
     def test_find_solar_terms_between(self):
         startDate = Date("1983/12/1")
-        endDate = Date('1984/12/23')
+        endDate = Date("1984/12/23")
         terms = find_solar_terms_between(startDate, endDate)
         for x in terms:
             print(Date(x))
 
     @pytest.mark.degrees
     def test_when_sun_is_at_degree(self):
-        startDate = Date('1983/12/1')
+        startDate = Date("1983/12/1")
         print(when_is_sun_at_degrees_longitude(startDate, 0))
         # self.assertEqual(when_is_sun_at_degrees_longitude(startDate, 0))
 
     @pytest.mark.findnewmoon
     def test_new_moon_list(self):
-        startDate = Date('1983/12/1')
-        endDate = Date('1984/12/23')
+        startDate = Date("1983/12/1")
+        endDate = Date("1984/12/23")
 
         newmoons = find_new_moon_between(startDate, endDate)
 
+        # Verify we got new moons back
+        assert newmoons is not None
         # for newmoon in newmoons:
         #     print(newmoon)

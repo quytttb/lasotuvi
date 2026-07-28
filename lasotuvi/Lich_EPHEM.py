@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
 """
 (c) 2016 doanguyen <dungnv2410@gmail.com>.
 """
 
-import ephem
-from typing import Tuple
 from datetime import date
 
-LUNAR_contract = Tuple[date, bool]  # [date, thang_nhuan]
+import ephem
+
+LUNAR_contract = tuple[date, bool]  # [date, thang_nhuan]
 
 
 def s2l(solarDate: ephem.Date, location: ephem.Observer, timezone: int) -> LUNAR_contract:
@@ -23,18 +22,24 @@ def s2l(solarDate: ephem.Date, location: ephem.Observer, timezone: int) -> LUNAR
     # Dong chi nam sau
     nextWinterSolstice = ephem.next_winter_solstice(solarDate)
 
-    dayInLunarYear = ephem.previous_new_moon(nextWinterSolstice) - ephem.previous_new_moon(previousWinterSolstice)
+    dayInLunarYear = ephem.previous_new_moon(nextWinterSolstice) - ephem.previous_new_moon(
+        previousWinterSolstice
+    )
 
-    diff = int(dayInLunarYear / 29.)
+    diff = int(dayInLunarYear / 29.0)
 
     lunarMonth = diff + 11
 
     lunarYear = solarDate.year
 
-    if dayInLunarYear > 365:
-        lunar_leap = (lunarMonth == find_lunar_month_between(previousWinterSolstice, nextWinterSolstice))
+    # TODO: Implement find_lunar_month_between() function
+    # Currently commented out as it's not implemented
+    # if dayInLunarYear > 365:
+    #     lunar_leap = lunarMonth == find_lunar_month_between(
+    #         previousWinterSolstice, nextWinterSolstice
+    #     )
 
-    print(dayInLunarYear, previousWinterSolstice, nextWinterSolstice)
+    # print(dayInLunarYear, previousWinterSolstice, nextWinterSolstice)
     return tuple(date(lunarYear, lunarMonth, lunarDay), lunar_leap)
 
 

@@ -1,0 +1,60 @@
+{
+     "name": "lasotuvi-frontend",
+     "version": "1.0.0",
+     "private": true,
+     "description": "Vietnamese Tử Vi (Purple Star Astrology) Frontend - Next.js 15 + React 19",
+     "scripts": {
+          "dev": "next dev",
+          "build": "next build",
+          "start": "next start",
+          "lint": "next lint",
+          "type-check": "tsc --noEmit",
+          "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+          "test": "jest",
+          "test:watch": "jest --watch"
+     },
+     "dependencies": {
+          "next": "^15.0.0",
+          "react": "^19.0.0-rc.0",
+          "react-dom": "^19.0.0-rc.0",
+          "@tanstack/react-query": "^5.56.2",
+          "@hookform/resolvers": "^3.9.0",
+          "react-hook-form": "^7.53.0",
+          "zod": "^3.23.8",
+          "axios": "^1.7.7",
+          "date-fns": "^4.1.0",
+          "lucide-react": "^0.446.0",
+          "clsx": "^2.1.1",
+          "tailwind-merge": "^2.5.2",
+          "class-variance-authority": "^0.7.0",
+          "@radix-ui/react-dialog": "^1.1.2",
+          "@radix-ui/react-label": "^2.1.0",
+          "@radix-ui/react-select": "^2.1.2",
+          "@radix-ui/react-tabs": "^1.1.1",
+          "@radix-ui/react-toast": "^1.2.2",
+          "@radix-ui/react-slot": "^1.1.0",
+          "jspdf": "^2.5.2",
+          "html2canvas": "^1.4.1"
+     },
+     "devDependencies": {
+          "@types/node": "^22.7.5",
+          "@types/react": "^18.3.11",
+          "@types/react-dom": "^18.3.0",
+          "typescript": "^5.6.3",
+          "eslint": "^8.57.1",
+          "eslint-config-next": "^15.0.0",
+          "tailwindcss": "^3.4.13",
+          "postcss": "^8.4.47",
+          "autoprefixer": "^10.4.20",
+          "prettier": "^3.3.3",
+          "prettier-plugin-tailwindcss": "^0.6.8",
+          "@testing-library/react": "^16.0.1",
+          "@testing-library/jest-dom": "^6.5.0",
+          "jest": "^29.7.0",
+          "jest-environment-jsdom": "^29.7.0"
+     },
+     "engines": {
+          "node": ">=18.18.0",
+          "npm": ">=9.0.0"
+     }
+}

@@ -105,3 +105,7 @@ tags
 _pycache
 .mypy*
 .idea/
+
+# Local reference PDFs (too large for git)
+Tailieuthamkhao/
+*.backup

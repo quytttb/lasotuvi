@@ -1,32 +1,32 @@
-# -*- coding: utf-8 -*-
 """
 (c) 2016 doanguyen <dungnv2410@gmail.com>.
 """
 from lasotuvi.AmDuong import nguHanh
 
 
-class Sao(object):
+class Sao:
     """Summary
-        Args:
-            saoID (int): 1, 2, ...
-            saoTen (TYPE): Tử vi, Tham lang,...
-            saoNguHanh (TYPE): K, M, T, H, O
-            saoLoai (str, optional): Sao tốt < 10, sau xấu > 10
-                1: Chính tinh, 2: Phụ tinh nói chung
-                3: Quý tinh, 4: Quyền tinh, 5: Phúc tinh, 6: Văn tinh
-                7: Đài các tinh, 8: Đào hoa tinh
+    Args:
+        saoID (int): 1, 2, ...
+        saoTen (TYPE): Tử vi, Tham lang,...
+        saoNguHanh (TYPE): K, M, T, H, O
+        saoLoai (str, optional): Sao tốt < 10, sau xấu > 10
+            1: Chính tinh, 2: Phụ tinh nói chung
+            3: Quý tinh, 4: Quyền tinh, 5: Phúc tinh, 6: Văn tinh
+            7: Đài các tinh, 8: Đào hoa tinh
 
-                11: Sát tinh, 12: Bại tinh, 13: Ám tinh, 14: Dâm tinh,
-                15: Hình tinh
-            saoPhuongVi (str, optional): Bắc Đẩu tinh, Nam Bắc Đẩu tinh
-            saoAmDuong (str, optional): Âm Dương của sao
-            vongTrangSinh (int, optional): 0/None: Không thuộc vòng Tràng sinh
-                                            1: Thuộc vòng Tràng sinh
-        """
+            11: Sát tinh, 12: Bại tinh, 13: Ám tinh, 14: Dâm tinh,
+            15: Hình tinh
+        saoPhuongVi (str, optional): Bắc Đẩu tinh, Nam Bắc Đẩu tinh
+        saoAmDuong (str, optional): Âm Dương của sao
+        vongTrangSinh (int, optional): 0/None: Không thuộc vòng Tràng sinh
+                                        1: Thuộc vòng Tràng sinh
+    """
 
-    def __init__(self, saoID, saoTen, saoNguHanh, saoLoai=2, saoPhuongVi="",
-                 saoAmDuong="", vongTrangSinh=0):
-        super(Sao, self).__init__()
+    def __init__(
+        self, saoID, saoTen, saoNguHanh, saoLoai=2, saoPhuongVi="", saoAmDuong="", vongTrangSinh=0
+    ):
+        super().__init__()
         self.saoID = saoID
         self.saoTen = saoTen
         self.saoNguHanh = saoNguHanh
@@ -34,7 +34,7 @@ class Sao(object):
         self.saoPhuongVi = saoPhuongVi
         self.saoAmDuong = saoAmDuong
         self.vongTrangSinh = vongTrangSinh
-        self.cssSao = nguHanh(saoNguHanh)['css']
+        self.cssSao = nguHanh(saoNguHanh)["css"]
         self.saoDacTinh = None
 
     def anDacTinh(self, dacTinh):
@@ -44,13 +44,6 @@ class Sao(object):
         Returns:
             object: self
         """
-        dt = {
-            "V": "vuongDia",
-            "M": "mieuDia",
-            "Đ": "dacDia",
-            "B": "binhHoa",
-            "H": "hamDia",
-        }
         self.saoDacTinh = dacTinh
         # self.saoTen += " (%s)" % dacTinh
         # self.cssSao = dt[dacTinh]
@@ -67,8 +60,8 @@ class Sao(object):
 
 
 # Tử vi tinh hệ
-saoTuVi = Sao(1, u"Tử vi", "O", 1, u"Đế tinh", 1, 0)
-saoLiemTrinh = Sao(2, u"Liêm trinh", "H", 1, u"Bắc đẩu tinh", 1, 0)
+saoTuVi = Sao(1, "Tử vi", "O", 1, "Đế tinh", 1, 0)
+saoLiemTrinh = Sao(2, "Liêm trinh", "H", 1, "Bắc đẩu tinh", 1, 0)
 saoThienDong = Sao(3, "Thiên đồng", "T", 1, "Bắc đẩu tinh", 1, 0)
 saoVuKhuc = Sao(4, "Vũ khúc", "K", 1, "Bắc đẩu tinh", -1, 0)
 saoThaiDuong = Sao(5, "Thái Dương", "H", 1, "Nam đẩu tinh", 1, 0)
@@ -100,7 +93,12 @@ saoTrucPhu = Sao(26, "Trực phù", "K", 16)
 
 #  Vòng Thiên can - Lộc tồn
 saoLocTon = Sao(27, "Lộc tồn", "O", 3, "Bắc đẩu tinh")
-saoBacSy = Sao(109, "Bác sỹ", "T", 5, )
+saoBacSy = Sao(
+    109,
+    "Bác sỹ",
+    "T",
+    5,
+)
 saoLucSi = Sao(28, "Lực sĩ", "H", 2)
 saoThanhLong = Sao(29, "Thanh long", "T", 5)
 saoTieuHao = Sao(30, "Tiểu hao", "H", 12)

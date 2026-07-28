@@ -1,44 +1,142 @@
-# -*- coding: utf-8 -*-
 """
 (c) 2016 doanguyen <dungnv2410@gmail.com>.
 """
-from lasotuvi.AmDuong import (dichCung, ngayThangNam, ngayThangNamCanChi, nguHanh,
-                     nguHanhNapAm, thienCan, timCoThan, timCuc, timHoaLinh,
-                     timLuuTru, timPhaToai, timThienKhoi, timThienMa,
-                     timThienQuanThienPhuc, timTrangSinh, timTriet, timTuVi,
-                     diaChi)
-from lasotuvi.Sao import (saoAnQuang, saoBachHo, saoBacSy, saoBatToa, saoBenh,
-                 saoBenhPhu, saoCoThan, saoCuMon, saoDaiHao, saoDaLa,
-                 saoDaoHoa, saoDauQuan, saoDeVuong, saoDiaGiai, saoDiaKhong,
-                 saoDiaKiep, saoDiaVong, saoDieuKhach, saoDuong, saoDuongPhu,
-                 saoGiaiThan, saoHoaCai, saoHoaKhoa, saoHoaKy, saoHoaLoc,
-                 saoHoaQuyen, saoHoaTinh, saoHongLoan, saoHuuBat, saoHyThan,
-                 saoKiepSat, saoKinhDuong, saoLamQuan, saoLiemTrinh,
-                 saoLinhTinh, saoLocTon, saoLongDuc, saoLongTri, saoLucSi,
-                 saoLuuHa, saoMo, saoMocDuc, saoNguyetDuc, saoPhaQuan,
-                 saoPhaToai, saoPhiLiem, saoPhongCao, saoPhucBinh, saoPhucDuc,
-                 saoPhuongCac, saoQuanDoi, saoQuanPhu2, saoQuanPhu3, saoQuaTu,
-                 saoQuocAn, saoSuy, saoTamThai, saoTangMon, saoTaPhu,
-                 saoTauThu, saoThai, saoThaiAm, saoThaiDuong, saoThaiPhu,
-                 saoThaiTue, saoThamLang, saoThanhLong, saoThatSat, saoThienCo,
-                 saoThienDong, saoThienDuc, saoThienGiai, saoThienHinh,
-                 saoThienHu, saoThienHy, saoThienKhoc, saoThienKhoi,
-                 saoThienKhong, saoThienLa, saoThienLuong, saoThienMa,
-                 saoThienPhu, saoThienPhuc, saoThienQuan, saoThienQuy,
-                 saoThienRieu, saoThienSu, saoThienTai, saoThienTho,
-                 saoThienThuong, saoThienTru, saoThienTuong, saoThienViet,
-                 saoThienY, saoThieuAm, saoThieuDuong, saoTieuHao,
-                 saoTrangSinh, saoTrucPhu, saoTu, saoTuePha, saoTuongQuan,
-                 saoTuPhu, saoTuVi, saoTuyet, saoVanKhuc, saoVanTinh,
-                 saoVanXuong, saoVuKhuc)
+from lasotuvi.AmDuong import (
+    diaChi,
+    dichCung,
+    ngayThangNam,
+    ngayThangNamCanChi,
+    nguHanh,
+    thienCan,
+    timCoThan,
+    timCuc,
+    timHoaLinh,
+    timLuuTru,
+    timPhaToai,
+    timThienKhoi,
+    timThienMa,
+    timThienQuanThienPhuc,
+    timTrangSinh,
+    timTriet,
+    timTuVi,
+)
+from lasotuvi.Sao import (
+    saoAnQuang,
+    saoBachHo,
+    saoBacSy,
+    saoBatToa,
+    saoBenh,
+    saoBenhPhu,
+    saoCoThan,
+    saoCuMon,
+    saoDaiHao,
+    saoDaLa,
+    saoDaoHoa,
+    saoDauQuan,
+    saoDeVuong,
+    saoDiaGiai,
+    saoDiaKhong,
+    saoDiaKiep,
+    saoDiaVong,
+    saoDieuKhach,
+    saoDuong,
+    saoDuongPhu,
+    saoGiaiThan,
+    saoHoaCai,
+    saoHoaKhoa,
+    saoHoaKy,
+    saoHoaLoc,
+    saoHoaQuyen,
+    saoHoaTinh,
+    saoHongLoan,
+    saoHuuBat,
+    saoHyThan,
+    saoKiepSat,
+    saoKinhDuong,
+    saoLamQuan,
+    saoLiemTrinh,
+    saoLinhTinh,
+    saoLocTon,
+    saoLongDuc,
+    saoLongTri,
+    saoLucSi,
+    saoLuuHa,
+    saoMo,
+    saoMocDuc,
+    saoNguyetDuc,
+    saoPhaQuan,
+    saoPhaToai,
+    saoPhiLiem,
+    saoPhongCao,
+    saoPhucBinh,
+    saoPhucDuc,
+    saoPhuongCac,
+    saoQuanDoi,
+    saoQuanPhu2,
+    saoQuanPhu3,
+    saoQuaTu,
+    saoQuocAn,
+    saoSuy,
+    saoTamThai,
+    saoTangMon,
+    saoTaPhu,
+    saoTauThu,
+    saoThai,
+    saoThaiAm,
+    saoThaiDuong,
+    saoThaiPhu,
+    saoThaiTue,
+    saoThamLang,
+    saoThanhLong,
+    saoThatSat,
+    saoThienCo,
+    saoThienDong,
+    saoThienDuc,
+    saoThienGiai,
+    saoThienHinh,
+    saoThienHu,
+    saoThienHy,
+    saoThienKhoc,
+    saoThienKhoi,
+    saoThienKhong,
+    saoThienLa,
+    saoThienLuong,
+    saoThienMa,
+    saoThienPhu,
+    saoThienPhuc,
+    saoThienQuan,
+    saoThienQuy,
+    saoThienRieu,
+    saoThienSu,
+    saoThienTai,
+    saoThienTho,
+    saoThienThuong,
+    saoThienTru,
+    saoThienTuong,
+    saoThienViet,
+    saoThienY,
+    saoThieuAm,
+    saoThieuDuong,
+    saoTieuHao,
+    saoTrangSinh,
+    saoTrucPhu,
+    saoTu,
+    saoTuePha,
+    saoTuongQuan,
+    saoTuPhu,
+    saoTuVi,
+    saoTuyet,
+    saoVanKhuc,
+    saoVanTinh,
+    saoVanXuong,
+    saoVuKhuc,
+)
 
 
 def lapDiaBan(diaBan, nn, tt, nnnn, gioSinh, gioiTinh, duongLich, timeZone):
     if duongLich is True:
-        nn, tt, nnnn, thangNhuan = \
-            ngayThangNam(nn, tt, nnnn, duongLich, timeZone)
-    canThang, canNam, chiNam = \
-        ngayThangNamCanChi(nn, tt, nnnn, False, timeZone)
+        nn, tt, nnnn, thangNhuan = ngayThangNam(nn, tt, nnnn, duongLich, timeZone)
+    canThang, canNam, chiNam = ngayThangNamCanChi(nn, tt, nnnn, False, timeZone)
 
     diaBan = diaBan(tt, gioSinh)
 
@@ -50,7 +148,7 @@ def lapDiaBan(diaBan, nn, tt, nnnn, gioSinh, gioiTinh, duongLich, timeZone):
 
     hanhCuc = timCuc(diaBan.cungMenh, canNam)
     cuc = nguHanh(hanhCuc)
-    cucSo = cuc['cuc']
+    cucSo = cuc["cuc"]
 
     # Nhập đại hạn khi đã biết được số cục
     # Theo sách Số tử vi dưới góc nhìn khoa học
@@ -110,7 +208,7 @@ def lapDiaBan(diaBan, nn, tt, nnnn, gioSinh, gioiTinh, duongLich, timeZone):
     # Vòng Lộc tồn
     # Vị trí sao Lộc tồn ở Can của năm sinh trên địa bàn
     #  sao Bác sỹ ở cùng cung với Lộc tồn
-    viTriLocTon = thienCan[canNam]['vitriDiaBan']
+    viTriLocTon = thienCan[canNam]["vitriDiaBan"]
     diaBan.nhapSao(viTriLocTon, saoLocTon, saoBacSy)
 
     amDuongNamNu = gioiTinh * amDuongNamSinh
@@ -242,8 +340,7 @@ def lapDiaBan(diaBan, nn, tt, nnnn, gioSinh, gioiTinh, duongLich, timeZone):
     viTriDiaKhong = dichCung(12, 12 - viTriDiaKiep)
     diaBan.nhapSao(viTriDiaKhong, saoDiaKhong)
 
-    viTriHoaTinh, viTriLinhTinh = timHoaLinh(chiNam, gioSinh,
-                                             gioiTinh, amDuongNamSinh)
+    viTriHoaTinh, viTriLinhTinh = timHoaLinh(chiNam, gioSinh, gioiTinh, amDuongNamSinh)
     diaBan.nhapSao(viTriHoaTinh, saoHoaTinh)
     diaBan.nhapSao(viTriLinhTinh, saoLinhTinh)
 
@@ -470,4 +567,4 @@ def lapDiaBan(diaBan, nn, tt, nnnn, gioSinh, gioiTinh, duongLich, timeZone):
 
     viTriTriet1, viTriTriet2 = timTriet(canNam)
     diaBan.nhapTriet(viTriTriet1, viTriTriet2)
-    return (diaBan)
+    return diaBan
