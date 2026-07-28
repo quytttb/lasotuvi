@@ -76,7 +76,7 @@ Hiện API đang dùng `snake_case` nhưng còn key Hán Việt (`cung_menh`, `t
 3. Done — Core modules renamed to English filenames
 4. Done — Identifiers → English PEP 8
 5. Done — API v2 English JSON keys (`api` version **2.0.0**)
-6. Done — Tests + frontend types updated
+6. Done — Tests updated for English API / modules
 7. Done — Interpretation engine: `analysis.py`, `data/interpretations.json`, API fields `formations` / `interpretations`
 
 ### Interpretation module map

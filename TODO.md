@@ -46,30 +46,6 @@
   - [ ] Rate limiting (slowapi installed, needs config)
   - [ ] Response caching (Redis)
   - [ ] Docker containerization
-  
-* [x] **Phase 4: Frontend - Next.js 15 + React 19 Setup** ✅ **COMPLETE**
-  - [x] Setup Next.js 15 với TypeScript
-  - [x] Tailwind CSS + custom colors (5 elements)
-  - [x] TypeScript types (240+ lines, 15+ interfaces)
-  - [x] API client với error handling (11 methods)
-  - [x] React Query integration (TanStack Query)
-  - [x] Landing page với responsive design
-  - [x] Project structure và configuration
-  - [x] Documentation (400+ lines README)
-  - [x] Environment variables
-  - [x] Setup script
-  
-* [ ] **Phase 4.5-4.8: Frontend Development** 🚀 NEXT
-  - [ ] Chart form với React Hook Form + Zod validation
-  - [ ] Chart visualization (12 palaces display)
-  - [ ] Palace cards với stars
-  - [ ] Chart analysis display
-  - [ ] Batch generation UI
-  - [ ] Export PDF với jsPDF
-  - [ ] Mobile responsive refinement
-  - [ ] Dark mode implementation
-  - [ ] Info pages (elements, can-chi)
-  - [ ] Custom hooks (useChart, useAnalyze)
 
 ### 📖 Interpretation Engine (Backend)
 * [x] `EarthPlate.get_related_palaces` — san fang si zheng frame

@@ -1,6 +1,6 @@
 # LasoTuVi
 
-Open-source Zi Wei Dou Shu (Purple Star Astrology) chart engine — Python 3.12+, FastAPI, Next.js.
+Open-source Zi Wei Dou Shu (Purple Star Astrology) chart engine — Python 3.12+, FastAPI.
 
 This repository is maintained independently (not synced with abandoned upstream forks).
 
@@ -9,10 +9,10 @@ This repository is maintained independently (not synced with abandoned upstream 
 - Full star placement: 12 palaces, major/minor stars, brightness (Miao/Wang/…)
 - Solar ↔ lunar conversion, full stem–branch (year/month/day/hour)
 - REST API v2 (**English JSON keys**, breaking)
+- Chart formations (cách cục) and palace star interpretations
 - Client-friendly star fields: `brightness`, `category_label`, `is_auspicious`
 - Monthly luck via `view_year`
 - Star catalog: `GET /info/stars`
-- Frontend scaffold: Next.js 15 + React 19 + TypeScript + Tailwind
 - Modern pytest suite
 
 ## Terminology
@@ -23,7 +23,6 @@ Code naming (PEP 8 English): see [docs/NAMING.md](docs/NAMING.md).
 ## Requirements
 
 - Python ≥ 3.12
-- Node.js ≥ 20 (frontend)
 
 ## Quick start
 
@@ -60,20 +59,11 @@ Example body for `POST /chart/generate`:
 }
 ```
 
-### Frontend
-
-```bash
-cd frontend
-./setup.sh
-npm run dev
-```
-
 ## Layout
 
 ```
-lasotuvi/          # Engine (stem_branch, earth_plate, stars, chart_builder, …)
+lasotuvi/          # Engine (stem_branch, earth_plate, stars, chart_builder, analysis, …)
 api/               # FastAPI v2
-frontend/          # Next.js client
 tests/
 docs/TERMINOLOGY.md
 docs/NAMING.md
