@@ -1,8 +1,10 @@
-# Thuật ngữ Tử Vi Đẩu Số — Glossary
+# Thuật ngữ Tử Vi Đẩu Số / Zi Wei Dou Shu glossary
 
-Tài liệu đối chiếu **Hán Việt ↔ 繁體中文 ↔ English** dùng trong repo `lasotuvi`.
+## Tiếng Việt
 
-Nguồn tham chiếu chính (tra cứu 2026):
+Tài liệu đối chiếu **Hán Việt ↔ 繁體中文 ↔ English** dùng trong dự án `lasotuvi`. Tiếng Việt là ngôn ngữ chính; cột tiếng Anh là đối chiếu thứ hai cho người đọc và API/mã nguồn.
+
+Nguồn tham chiếu chính (tra cứu năm 2026):
 
 - [sǹg-miā — ZWDS Glossary (EN)](https://sng-mia.com/en/articles/learn/glossary)
 - [sǹg-miā — Brightness 廟旺平陷](https://sng-mia.com/articles/learn/brightness-system)
@@ -11,13 +13,15 @@ Nguồn tham chiếu chính (tra cứu 2026):
 - [Fortune Cloud — Four Transformations](https://fortunecloud.co/en/learn/four-transformations)
 - [starnum — Si Hua / brightness (TW)](https://starnum.com.tw/blog/en/zwds-four-transformations-complete-guide)
 
-> **Quy ước trong code:** tên biến / hàm / class / file dùng **English + snake_case** (PEP 8).  
-> Chuỗi hiển thị cho người dùng Việt Nam vẫn có thể giữ Hán Việt.  
-> Xem thêm [NAMING.md](./NAMING.md).
+> **Quy ước trong code:** tên biến, hàm, class và tệp tuân theo [Quy ước đặt tên](NAMING.md). Chuỗi hiển thị cho người dùng Việt Nam có thể giữ Hán Việt và luôn tách biệt với identifier.
+
+## English
+
+This is the Vietnamese-first Hán Việt ↔ Traditional Chinese ↔ English reference for `lasotuvi`. English columns provide the secondary-language equivalents used when reading the API and source code. The Vietnamese sections below are canonical; see [Naming conventions](NAMING.md) for identifier rules.
 
 ---
 
-## 1. Hệ thống tổng quát
+## 1. Hệ thống tổng quát / General system
 
 | Hán Việt | 繁體中文 | English (chuẩn phổ biến) | Diễn giải ngắn |
 |---|---|---|---|
@@ -30,7 +34,7 @@ Nguồn tham chiếu chính (tra cứu 2026):
 
 ---
 
-## 2. Thiên Can — Địa Chi
+## 2. Thiên Can — Địa Chi / Heavenly Stems and Earthly Branches
 
 ### Thiên Can (天干 / Heavenly Stems)
 
@@ -68,7 +72,7 @@ Nguồn tham chiếu chính (tra cứu 2026):
 
 ---
 
-## 3. Âm Dương — Ngũ Hành — Cục
+## 3. Âm Dương — Ngũ Hành — Cục / Yin, Yang, Five Elements, and Bureau
 
 | Hán Việt | 繁體 | English | Ghi chú |
 |---|---|---|---|
@@ -91,7 +95,7 @@ Nguồn tham chiếu chính (tra cứu 2026):
 
 ---
 
-## 4. Thập nhị cung (十二宮 / Twelve Palaces)
+## 4. Thập nhị cung / Twelve Palaces (十二宮)
 
 Thứ tự trong engine `lasotuvi` (từ cung Mệnh theo chiều an cung):
 
@@ -124,7 +128,7 @@ Trong code: `EarthPlate.get_related_palaces(index)`.
 
 ---
 
-## 5. Độ sáng sao — Đặc tính (廟旺平陷 / Brightness)
+## 5. Độ sáng sao / Star brightness (廟旺平陷)
 
 Trường phái Việt trong repo dùng 5 mức: **M / V / Đ / B / H**.
 
@@ -140,7 +144,7 @@ Một số sách Đài/Hoa lục còn chia nhỏ thêm **利 (Li)** giữa Đắ
 
 ---
 
-## 6. Tứ Hóa (四化 / Four Transformations)
+## 6. Tứ Hóa / Four Transformations (四化)
 
 | Hán Việt | 繁體 | English | Ý chính |
 |---|---|---|---|
@@ -152,7 +156,7 @@ Một số sách Đài/Hoa lục còn chia nhỏ thêm **利 (Li)** giữa Đắ
 
 ---
 
-## 7. Hệ hạn / thời vận
+## 7. Hệ hạn và thời vận / Luck cycles and timing
 
 | Hán Việt | 繁體 | English | Diễn giải |
 |---|---|---|---|
@@ -168,7 +172,7 @@ Một số sách Đài/Hoa lục còn chia nhỏ thêm **利 (Li)** giữa Đắ
 
 ---
 
-## 8. Mười bốn chính tinh (十四主星 / Fourteen Major Stars)
+## 8. Mười bốn chính tinh / Fourteen Major Stars (十四主星)
 
 | Hán Việt (repo) | 繁體 | Pinyin | English (phổ biến) |
 |---|---|---|---|
@@ -191,7 +195,7 @@ Nhóm Bắc Đẩu / Nam Đẩu: xem [sǹg-miā glossary](https://sng-mia.com/en
 
 ---
 
-## 9. Một số phụ tinh / sát tinh thường gặp
+## 9. Một số phụ tinh và sát tinh thường gặp / Common minor and malefic stars
 
 | Hán Việt | 繁體 | English (gợi ý code / docs) |
 |---|---|---||
@@ -220,7 +224,7 @@ Nhóm Bắc Đẩu / Nam Đẩu: xem [sǹg-miā glossary](https://sng-mia.com/en
 
 ---
 
-## 10. Vòng Trường Sinh (長生十二神)
+## 10. Vòng Trường Sinh / Twelve Stages of Life (長生十二神)
 
 | Hán Việt | 繁體 | English |
 |---|---|---|
@@ -239,7 +243,7 @@ Nhóm Bắc Đẩu / Nam Đẩu: xem [sǹg-miā glossary](https://sng-mia.com/en
 
 ---
 
-## 11. Lịch
+## 11. Lịch / Calendar
 
 | Hán Việt | 繁體 | English |
 |---|---|---|
@@ -251,7 +255,7 @@ Nhóm Bắc Đẩu / Nam Đẩu: xem [sǹg-miā glossary](https://sng-mia.com/en
 
 ---
 
-## 12. Cách cục & luận đoán (格局 / Interpretation)
+## 12. Cách cục và luận đoán / Formations and interpretation (格局)
 
 | Hán Việt | 繁體 | English (code) | Ghi chú |
 |---|---|---|---|
@@ -269,31 +273,7 @@ API: `formations` trên chart / earth plate; `interpretations[]` trên mỗi pal
 
 ---
 
-## 13. Ánh xạ nhanh sang tên code English
-
-| Khái niệm domain | Tên code đề xuất |
-|---|---|
-| Cung | `palace` |
-| Sao | `star` |
-| Địa bàn | `earth_plate` / `chart_plate` |
-| Thiên bàn | `heaven_plate` / `chart_meta` |
-| An sao / lập lá số | `build_chart` / `place_stars` |
-| Cung Mệnh / Thân | `life_palace` / `body_palace` |
-| Cục | `element_bureau` / `bureau` |
-| Đại / tiểu / nguyệt hạn | `major_period` / `annual_luck` / `monthly_luck` |
-| Đặc tính (M/V/Đ/B/H) | `brightness` |
-| Tứ hóa | `four_transformations` |
-| Can Chi | `stem_branch` / `heavenly_stem` / `earthly_branch` |
-| Âm dương | `yin_yang` |
-| Ngũ hành | `five_elements` |
-| Tam phương tứ chính | `get_related_palaces` / four-palace frame |
-| Cách cục | `formation` / `detect_formations` |
-| Luận đoán | `interpretation` / `interpret_palace` |
-| Knowledge base luận đoán | `lasotuvi/data/interpretations.json` |
-
-Chi tiết rename file/hàm: [NAMING.md](./NAMING.md).
-
-## 13. Ánh xạ sang tên code (Pinyin + structural English)
+## 13. Ánh xạ sang tên code / Code identifier mapping
 
 | Khái niệm domain | Identifier |
 |---|---|
@@ -311,4 +291,6 @@ Chi tiết rename file/hàm: [NAMING.md](./NAMING.md).
 | Can Chi | `stem_branch` / `HEAVENLY_STEMS` / `EARTHLY_BRANCHES` |
 | Âm dương / Ngũ hành | `yin_yang` / `five_element` |
 
-Chi tiết: [NAMING.md](./NAMING.md).
+Đây là ánh xạ chuẩn của dự án; không dùng các tên English literal cũ như `brightness`, `element_bureau` hoặc `major_period` cho domain Pinyin. Chi tiết: [Quy ước đặt tên](NAMING.md).
+
+In this project, the table is the canonical identifier mapping. Do not introduce older literal-English domain names such as `brightness`, `element_bureau`, or `major_period` where the Pinyin identifier is specified. See [Naming conventions](NAMING.md) for details.

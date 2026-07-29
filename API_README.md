@@ -1,11 +1,13 @@
-# API v2 — English schema (breaking)
+# API LasoTuVi v2
 
-LasoTuVi REST API for Zi Wei Dou Shu charts.
+## Tiếng Việt
 
-## Breaking changes from v1
+API REST LasoTuVi v2 cung cấp dữ liệu lá số Tử Vi Đẩu Số. Khóa JSON sử dụng tiếng Anh; đây là thay đổi không tương thích với API v1.
+
+### Thay đổi từ v1
 
 | v1 | v2 |
-|----|----|
+|---|---|
 | `ngay` / `thang` / `nam` / `gio` | `day` / `month` / `year` / `hour` |
 | `gioi_tinh` / `duong_lich` / `nam_xem` | `gender` / `is_solar` / `view_year` |
 | `can_chi` / `dia_ban` / `thien_ban` | `stem_branch` / `earth_plate` / `chart_meta` |
@@ -14,48 +16,60 @@ LasoTuVi REST API for Zi Wei Dou Shu charts.
 | `GET /info/sao` | `GET /info/stars` |
 | `POST /calendar/can-chi` | `POST /calendar/stem-branch` |
 
-Version: **2.0.0**
+Phiên bản: **2.0.0**
 
-## Quick start
+### Khởi động nhanh
 
 ```bash
 uv sync --locked --extra api
 ./run_api.sh
 ```
 
-Install [uv](https://docs.astral.sh/uv/) to use the reviewed dependency set in `uv.lock`.
-`pip install -e ".[api]"` remains available when a locked environment is not required.
+Cài [uv](https://docs.astral.sh/uv/) để dùng bộ phụ thuộc đã rà soát trong `uv.lock`. `pip install -e ".[api]"` vẫn khả dụng khi không cần môi trường khóa.
 
-- Docs: http://localhost:8000/docs
+- Tài liệu tương tác: http://localhost:8000/docs
 - Liveness: http://localhost:8000/health
 - Readiness: http://localhost:8000/ready
 
-## Main endpoints
+### Endpoint chính
 
-- `POST /chart/generate` — full chart
-- `POST /chart/earth-plate` — earth plate only
-- `POST /chart/analyze` — palace analysis
-- `POST /chart/batch` — up to 10 charts
-- `POST /calendar/solar-to-lunar` / `lunar-to-solar`
-- `POST /calendar/stem-branch`
-- `GET /info/stars` / `/info/elements` / `/info/stem-branch` / `/info/hour-branches`
+- `POST /chart/generate` — lập lá số đầy đủ.
+- `POST /chart/earth-plate` — chỉ tạo địa bàn.
+- `POST /chart/analyze` — phân tích cung.
+- `POST /chart/batch` — tối đa 10 lá số.
+- `POST /calendar/solar-to-lunar` và `POST /calendar/lunar-to-solar`.
+- `POST /calendar/stem-branch`.
+- `GET /info/stars`, `/info/elements`, `/info/stem-branch`, `/info/hour-branches`.
 
-All responses include `X-Request-ID` and `X-Process-Time`. Pass an `X-Request-ID` request
-header to preserve an existing trace identifier. Internal exception details are logged but
-are not returned in 500/503 responses.
+Mọi phản hồi đều có `X-Request-ID` và `X-Process-Time`. Gửi `X-Request-ID` trong request header để giữ nguyên mã truy vết. Chi tiết ngoại lệ nội bộ được ghi log nhưng không trả về trong phản hồi 500/503.
 
-For production, set `LASOTUVI_CORS_ORIGINS` to the comma-separated client origins. Credentialed
-CORS is disabled by default and cannot be combined with the wildcard origin.
+Trong môi trường production, đặt `LASOTUVI_CORS_ORIGINS` thành danh sách origin của ứng dụng khách, phân tách bằng dấu phẩy. CORS có credentials tắt mặc định và không thể dùng cùng wildcard origin.
 
-## Interpretation fields (v2)
+### Trường diễn giải (v2)
 
-`POST /chart/generate` and `POST /chart/earth-plate` include:
+`POST /chart/generate` và `POST /chart/earth-plate` bao gồm:
 
-| Field | Location | Meaning |
-|-------|----------|---------|
-| `formations` | chart + earth plate | Detected chart patterns (cách cục): `{code, name, description}` |
-| `interpretations` | each palace | Star readings from KB: `{star, interpretation}` |
+| Trường | Vị trí | Ý nghĩa |
+|---|---|---|
+| `formations` | lá số và địa bàn | Cách cục được phát hiện: `{code, name, description}` |
+| `interpretations` | mỗi cung | Diễn giải sao từ knowledge base: `{star, interpretation}` |
 
-Engine: `lasotuvi.analysis.ChartAnalyzer`. Knowledge base: `lasotuvi/data/interpretations.json`.
+Bộ máy: `lasotuvi.analysis.ChartAnalyzer`. Knowledge base: `lasotuvi/data/interpretations.json`. Xem thêm [Thuật ngữ](docs/TERMINOLOGY.md) và [Quy ước đặt tên](docs/NAMING.md).
 
-See [docs/TERMINOLOGY.md](docs/TERMINOLOGY.md) §12 and [docs/NAMING.md](docs/NAMING.md) for vocabulary.
+---
+
+## English
+
+LasoTuVi REST API v2 provides Zi Wei Dou Shu chart data. JSON keys are English, which is a breaking change from v1.
+
+### Quick start
+
+Run `uv sync --locked --extra api` followed by `./run_api.sh`. The interactive documentation, liveness endpoint, and readiness endpoint are available at http://localhost:8000/docs, http://localhost:8000/health, and http://localhost:8000/ready.
+
+### Main endpoints
+
+The API exposes chart generation, earth-plate generation, analysis, batch generation (up to 10 charts), solar/lunar conversion, stem–branch calculation, and the information endpoints listed above. Every response includes `X-Request-ID` and `X-Process-Time`; internal exception details are logged but never returned in 500/503 responses.
+
+### Production configuration
+
+Set `LASOTUVI_CORS_ORIGINS` to a comma-separated list of client origins. Credentialed CORS is disabled by default and cannot be combined with a wildcard origin. `formations` appears on chart and earth-plate responses, while `interpretations` appears on every palace.
