@@ -1,6 +1,6 @@
 # API LasoTuVi v2
 
-## Tiếng Việt
+[English version](API_README.en.md)
 
 API REST LasoTuVi v2 cung cấp dữ liệu lá số Tử Vi Đẩu Số. Khóa JSON sử dụng tiếng Anh; đây là thay đổi không tương thích với API v1.
 
@@ -55,21 +55,3 @@ Trong môi trường production, đặt `LASOTUVI_CORS_ORIGINS` thành danh sác
 | `interpretations` | mỗi cung | Diễn giải sao từ knowledge base: `{star, interpretation}` |
 
 Bộ máy: `lasotuvi.analysis.ChartAnalyzer`. Knowledge base: `lasotuvi/data/interpretations.json`. Xem thêm [Thuật ngữ](docs/TERMINOLOGY.md) và [Quy ước đặt tên](docs/NAMING.md).
-
----
-
-## English
-
-LasoTuVi REST API v2 provides Zi Wei Dou Shu chart data. JSON keys are English, which is a breaking change from v1.
-
-### Quick start
-
-Run `uv sync --locked --extra api` followed by `./run_api.sh`. The interactive documentation, liveness endpoint, and readiness endpoint are available at http://localhost:8000/docs, http://localhost:8000/health, and http://localhost:8000/ready.
-
-### Main endpoints
-
-The API exposes chart generation, earth-plate generation, analysis, batch generation (up to 10 charts), solar/lunar conversion, stem–branch calculation, and the information endpoints listed above. Every response includes `X-Request-ID` and `X-Process-Time`; internal exception details are logged but never returned in 500/503 responses.
-
-### Production configuration
-
-Set `LASOTUVI_CORS_ORIGINS` to a comma-separated list of client origins. Credentialed CORS is disabled by default and cannot be combined with a wildcard origin. `formations` appears on chart and earth-plate responses, while `interpretations` appears on every palace.

@@ -1,6 +1,6 @@
 # LasoTuVi
 
-## Tiếng Việt
+[English version](README.en.md)
 
 LasoTuVi là bộ máy lập lá số Tử Vi Đẩu Số mã nguồn mở, hỗ trợ Python 3.12–3.13 và API FastAPI. Kho mã này được duy trì độc lập, không đồng bộ với các nhánh nguồn đã ngừng phát triển.
 
@@ -94,34 +94,3 @@ Việc lập lá số chạy py-iztro/PythonMonkey trong một tiến trình con
 ### Giấy phép
 
 MIT. Bộ máy lập lá số ban đầu do doanguyen phát triển (2016); nhánh này được hiện đại hóa và duy trì độc lập tại [quytttb/lasotuvi](https://github.com/quytttb/lasotuvi).
-
----
-
-## English
-
-LasoTuVi is an open-source Zi Wei Dou Shu chart engine for Python 3.12–3.13 with a FastAPI API. This repository is maintained independently and is not synchronized with abandoned upstream forks.
-
-### Features
-
-- Full placement across 12 palaces, including major and minor stars and Miao/Wang/De/Ping/Xian brightness.
-- Solar ↔ lunar conversion and year/month/day/hour stem–branch calculation.
-- REST API v2 with English JSON keys (breaking from v1).
-- Chart-formation detection and palace-level star interpretations.
-- Client-friendly star fields: `miao_wang`, `category_label`, and `is_auspicious`.
-- Yearly-luck view through `view_year` and a star catalog at `GET /info/stars`.
-
-### Requirements and setup
-
-Python 3.12 or 3.13 is required. Run `uv sync --locked --extra dev` to install the reviewed dependency set from `uv.lock`; `pip install -e ".[dev]"` remains supported but resolves dependencies at installation time. To update dependencies intentionally, run `uv lock --upgrade`, review the lockfile, then run tests and audits.
-
-### API and library
-
-Start the API with `./run_api.sh` or `uvicorn api.main:app --reload --host 0.0.0.0 --port 8000`. Interactive documentation is available at http://localhost:8000/docs. Install the Python library with `pip install -e .`.
-
-### Runtime configuration
-
-Chart generation runs py-iztro/PythonMonkey in an isolated subprocess. `LASOTUVI_IZTRO_TIMEOUT_SECONDS` defaults to `15`; `LASOTUVI_IZTRO_BUSY_TIMEOUT_SECONDS` defaults to `2`; `LASOTUVI_CORS_ORIGINS` defaults to `*`; and `LASOTUVI_CORS_ALLOW_CREDENTIALS` should be enabled only with explicit origins.
-
-### License
-
-MIT. The original chart engine was created by doanguyen (2016); this fork is modernized and independently maintained at [quytttb/lasotuvi](https://github.com/quytttb/lasotuvi).

@@ -1,6 +1,6 @@
 # Quy ước đặt tên — Pinyin và tiếng Anh cấu trúc
 
-## Tiếng Việt
+[English version](NAMING.en.md)
 
 Mục tiêu: identifier tuân theo PEP 8 (`snake_case`, `PascalCase`, `UPPER_SNAKE_CASE`) và dùng thuật ngữ quốc tế của Zi Wei Dou Shu một cách nhất quán.
 
@@ -55,17 +55,3 @@ Tài liệu Zi Wei Dou Shu, Phong Thủy và Bát Tự quốc tế thường gi�
 | `set_annual_luck` | `set_xiao_xian` |
 
 Khóa JSON API tuân theo cùng ánh xạ này. API vẫn thuộc dòng phiên bản **2.x**; mọi thay đổi khóa phải được ghi rõ là thay đổi không tương thích. Xem thêm [Thuật ngữ](TERMINOLOGY.md).
-
----
-
-## English
-
-Identifiers follow PEP 8: `snake_case`, `PascalCase`, and `UPPER_SNAKE_CASE`.
-
-1. Use **Pinyin** for stars, deities, Four Transformations, and other proper domain names: `ZI_WEI`, `TAI_YANG`, `WU_QU`, `hua_lu`, `zi_wei`, `find_tian_kui`.
-2. Use stable **English** for chart structure: `life_palace`, `body_palace`, `earth_plate`, `stem_branch`, `palace`, `stars`.
-3. Use **Pinyin**, not literal translations, for brightness, bureaux, and luck cycles: `miao_wang`, `wu_xing_ju`, `da_xian_age`, `xiao_xian_branch`, `yue_xian`.
-4. Files use `snake_case.py`; classes use `PascalCase`, for example `EarthPlate`, `Palace`, `Star`, and `HeavenPlate`.
-5. User-facing Vietnamese/Hán Việt strings remain separate from machine-facing identifiers.
-
-Do not translate star names into literal English identifiers and do not use unaccented Vietnamese identifiers. The tables above are the canonical mapping for the current codebase and API JSON keys. Pinyin preserves the terminology used internationally in Zi Wei Dou Shu, Feng Shui, and BaZi literature and avoids confusion with Western-astrology terms such as “Sun” and “Moon”.
