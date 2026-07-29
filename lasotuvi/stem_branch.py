@@ -2,7 +2,7 @@
 (c) 2016 doanguyen <dungnv2410@gmail.com>.
 """
 
-from lasotuvi.lunar_calendar import lunar_to_solar, solar_to_lunar, julian_day_from_date
+from lasotuvi.lunar_calendar import julian_day_from_date, lunar_to_solar, solar_to_lunar
 
 HEAVENLY_STEMS = [
     {
@@ -326,20 +326,48 @@ def five_element(element_name):
         Exception: Description
     """
     if element_name in ["Kim", "K"]:
-        return {"id": 1, "element_name": "Kim", "wu_xing_ju": 4, "wu_xing_ju_name": "Kim tứ Cục", "css": "hanhKim"}
+        return {
+            "id": 1,
+            "element_name": "Kim",
+            "wu_xing_ju": 4,
+            "wu_xing_ju_name": "Kim tứ Cục",
+            "css": "hanhKim",
+        }
     elif element_name == "Moc" or element_name == "M":
-        return {"id": 2, "element_name": "Mộc", "wu_xing_ju": 3, "wu_xing_ju_name": "Mộc tam Cục", "css": "hanhMoc"}
+        return {
+            "id": 2,
+            "element_name": "Mộc",
+            "wu_xing_ju": 3,
+            "wu_xing_ju_name": "Mộc tam Cục",
+            "css": "hanhMoc",
+        }
     elif element_name == "Thuy" or element_name == "T":
-        return {"id": 3, "element_name": "Thủy", "wu_xing_ju": 2, "wu_xing_ju_name": "Thủy nhị Cục", "css": "hanhThuy"}
+        return {
+            "id": 3,
+            "element_name": "Thủy",
+            "wu_xing_ju": 2,
+            "wu_xing_ju_name": "Thủy nhị Cục",
+            "css": "hanhThuy",
+        }
     elif element_name == "Hoa" or element_name == "H":
-        return {"id": 4, "element_name": "Hỏa", "wu_xing_ju": 6, "wu_xing_ju_name": "Hỏa lục Cục", "css": "hanhHoa"}
+        return {
+            "id": 4,
+            "element_name": "Hỏa",
+            "wu_xing_ju": 6,
+            "wu_xing_ju_name": "Hỏa lục Cục",
+            "css": "hanhHoa",
+        }
     elif element_name == "Tho" or element_name == "O":
-        return {"id": 5, "element_name": "Thổ", "wu_xing_ju": 5, "wu_xing_ju_name": "Thổ ngũ Cục", "css": "hanhTho"}
+        return {
+            "id": 5,
+            "element_name": "Thổ",
+            "wu_xing_ju": 5,
+            "wu_xing_ju_name": "Thổ ngũ Cục",
+            "css": "hanhTho",
+        }
     else:
-        raise Exception(
-            "Tên Hành phải thuộc Kim (K), Mộc (M), Thủy (T), \
-             Hỏa (H) hoặc Thổ (O)"
-        )
+        raise Exception("Tên Hành phải thuộc Kim (K), Mộc (M), Thủy (T), \
+             Hỏa (H) hoặc Thổ (O)")
 
 
 def generation_control(element_a, element_b):

@@ -19,11 +19,15 @@ Version: **2.0.0**
 ## Quick start
 
 ```bash
-pip install -r requirements.txt -r requirements-api.txt
+python3.12 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[api]"
 ./run_api.sh
 ```
 
 - Docs: http://localhost:8000/docs
+- Liveness: http://localhost:8000/health
+- Readiness: http://localhost:8000/ready
 
 ## Main endpoints
 
@@ -34,6 +38,13 @@ pip install -r requirements.txt -r requirements-api.txt
 - `POST /calendar/solar-to-lunar` / `lunar-to-solar`
 - `POST /calendar/stem-branch`
 - `GET /info/stars` / `/info/elements` / `/info/stem-branch` / `/info/hour-branches`
+
+All responses include `X-Request-ID` and `X-Process-Time`. Pass an `X-Request-ID` request
+header to preserve an existing trace identifier. Internal exception details are logged but
+are not returned in 500/503 responses.
+
+For production, set `LASOTUVI_CORS_ORIGINS` to the comma-separated client origins. Credentialed
+CORS is disabled by default and cannot be combined with the wildcard origin.
 
 ## Interpretation fields (v2)
 

@@ -134,8 +134,9 @@ class TestDiaBan:
         # Kiểm tra mỗi cung có đại hạn
         for i in range(1, 13):
             assert hasattr(db.palaces[i], "da_xian_age")
-            assert isinstance(db.palaces[i].da_xian_age, int)
-            assert db.palaces[i].da_xian_age > 0
+            age = db.palaces[i].da_xian_age
+            assert isinstance(age, int)
+            assert age > 0
 
     @pytest.mark.parametrize(
         "chi_nam,gioi_tinh",
@@ -160,7 +161,7 @@ class TestDacTinhSao:
 
     def test_dac_tinh_sao_exists(self):
         """Test hàm apply_star_miao_wang tồn tại và hoạt động"""
-        from lasotuvi.stars import Star, ZI_WEI
+        from lasotuvi.stars import ZI_WEI, Star
 
         # Tạo bản sao sao Tử Vi để test
         sao_test = Star(ZI_WEI.star_id, ZI_WEI.name, ZI_WEI.element)
@@ -174,7 +175,7 @@ class TestDacTinhSao:
     @pytest.mark.parametrize("cung_so", range(1, 13))
     def test_dac_tinh_all_cungs(self, cung_so):
         """Test đặc tính sao ở tất cả 12 cung"""
-        from lasotuvi.stars import Star, ZI_WEI
+        from lasotuvi.stars import ZI_WEI, Star
 
         # Tạo bản sao sao Tử Vi để test
         sao_test = Star(ZI_WEI.star_id, ZI_WEI.name, ZI_WEI.element)

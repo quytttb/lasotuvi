@@ -1,4 +1,7 @@
 """Contract tests for the py-iztro canonical adapter."""
+
+import pytest
+
 from lasotuvi.iztro_adapter import (
     PALACE_NAME_MAP,
     STAR_NAME_MAP,
@@ -6,6 +9,7 @@ from lasotuvi.iztro_adapter import (
     get_astro_data,
     hour_branch_to_iztro_time_index,
     iztro_time_index_to_hour_branch,
+    shutdown_iztro_runtime,
     to_canonical,
 )
 
@@ -27,6 +31,7 @@ def test_name_maps_accept_vietnamese_chinese_and_english():
     assert PALACE_NAME_MAP["soul"] == "life"
 
 
+@pytest.mark.integration
 def test_to_canonical_full_smoke():
     raw = get_astro_data("1990-8-15", 6, 1)
     chart = to_canonical(
@@ -45,7 +50,22 @@ def test_to_canonical_full_smoke():
     assert any(star.mutagen for palace in chart.palaces for star in palace.stars)
 
 
+@pytest.mark.integration
 def test_build_canonical_chart_uses_api_hour_branch():
     chart = build_canonical_chart(15, 8, 1990, 7, 1, lunar_birth_month=6)
     assert chart.time_index == 6
     assert chart.lunar_birth_hour == 7
+
+
+@pytest.mark.integration
+def test_runtime_can_restart_cleanly():
+    shutdown_iztro_runtime()
+    first = get_astro_data("1990-8-15", 6, 1)
+    shutdown_iztro_runtime()
+    second = get_astro_data("1990-8-15", 6, 1)
+    assert first["solarDate"] == second["solarDate"] == "1990-8-15"
+
+
+def test_to_canonical_rejects_incomplete_upstream_data():
+    with pytest.raises(ValueError, match="exactly 12 palaces"):
+        to_canonical({"palaces": []})

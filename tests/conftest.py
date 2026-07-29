@@ -2,7 +2,6 @@
 Conftest for pytest - shared fixtures and configuration
 """
 
-
 import pytest
 from faker import Faker
 

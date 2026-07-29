@@ -2,7 +2,7 @@
 (c) 2016 doanguyen <dungnv2410@gmail.com>.
 """
 
-from lasotuvi.stem_branch import EARTHLY_BRANCHES, shift_palace, palace_distance
+from lasotuvi.stem_branch import EARTHLY_BRANCHES, palace_distance, shift_palace
 
 
 class Palace:

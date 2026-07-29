@@ -1,4 +1,5 @@
 """Test suite for FastAPI endpoints (English schema v2)."""
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -21,6 +22,16 @@ class TestAPIBasics:
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "healthy"
+
+    def test_readiness_check(self):
+        response = client.get("/ready")
+        assert response.status_code == 200
+        assert response.json()["status"] == "ready"
+
+    def test_request_metadata_headers(self):
+        response = client.get("/health", headers={"X-Request-ID": "test-request"})
+        assert response.headers["X-Request-ID"] == "test-request"
+        assert float(response.headers["X-Process-Time"]) >= 0
 
 
 class TestCalendarEndpoints:
@@ -118,10 +129,15 @@ class TestChartGeneration:
             assert "is_auspicious" in star
 
     def test_generate_chart_female(self, birth):
+        male = client.post("/chart/generate", json=birth).json()
         birth["gender"] = -1
         response = client.post("/chart/generate", json=birth)
         assert response.status_code == 200
-        assert response.json()["birth_info"]["gender"] == -1
+        female = response.json()
+        assert female["birth_info"]["gender"] == -1
+        male_ages = [palace["da_xian_age"] for palace in male["earth_plate"]["palaces"]]
+        female_ages = [palace["da_xian_age"] for palace in female["earth_plate"]["palaces"]]
+        assert male_ages != female_ages
 
     def test_invalid_hour(self, birth):
         birth["hour"] = 13
@@ -129,6 +145,14 @@ class TestChartGeneration:
 
     def test_invalid_gender(self, birth):
         birth["gender"] = 0
+        assert client.post("/chart/generate", json=birth).status_code == 422
+
+    def test_invalid_gregorian_date(self, birth):
+        birth.update(day=31, month=2)
+        assert client.post("/chart/generate", json=birth).status_code == 422
+
+    def test_invalid_lunar_day(self, birth):
+        birth.update(day=31, is_solar=False)
         assert client.post("/chart/generate", json=birth).status_code == 422
 
 

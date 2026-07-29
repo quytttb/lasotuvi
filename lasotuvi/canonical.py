@@ -1,7 +1,16 @@
 """Stable, engine-neutral chart model used by analysis and API layers."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TypedDict
+
+
+class RelatedPalaces(TypedDict):
+    opposite: int
+    trine_1: int
+    trine_2: int
+    all_related: tuple[int, int, int]
 
 
 @dataclass(frozen=True, slots=True)
@@ -95,7 +104,7 @@ class CanonicalChart:
         return None
 
     @staticmethod
-    def related_palace_indices(index: int) -> dict[str, int | tuple[int, int, int]]:
+    def related_palace_indices(index: int) -> RelatedPalaces:
         """Return the opposite and trine branches forming san fang si zheng."""
         if not 1 <= index <= 12:
             raise ValueError("palace index must be in 1..12")

@@ -1,4 +1,5 @@
 """Deterministic chart formations, taboo palaces, and interpretation rules."""
+
 from __future__ import annotations
 
 import json
@@ -30,13 +31,9 @@ MAJOR_STAR_KEYS = frozenset(
 )
 
 FORMATION_RULES: dict[str, frozenset[str]] = {
-    "emperor_treasury_military_minister": frozenset(
-        {"zi_wei", "tian_fu", "wu_qu", "tian_xiang"}
-    ),
+    "emperor_treasury_military_minister": frozenset({"zi_wei", "tian_fu", "wu_qu", "tian_xiang"}),
     "killings_breaker_ambition": frozenset({"qi_sha", "po_jun", "tan_lang"}),
-    "advisor_moon_harmony_elder": frozenset(
-        {"tian_ji", "tai_yin", "tian_tong", "tian_liang"}
-    ),
+    "advisor_moon_harmony_elder": frozenset({"tian_ji", "tai_yin", "tian_tong", "tian_liang"}),
     "gate_sun": frozenset({"ju_men", "tai_yang"}),
 }
 
@@ -190,9 +187,9 @@ class ChartAnalyzer:
         ]
         if self._is_emperor_ministers(stars_in_life):
             detected.append("emperor_ministers")
-        if life_index in (3, 9) and FORMATION_RULES[
-            "advisor_moon_harmony_elder"
-        ].issubset(stars_in_frame):
+        if life_index in (3, 9) and FORMATION_RULES["advisor_moon_harmony_elder"].issubset(
+            stars_in_frame
+        ):
             detected.append("ji_yue_tong_liang_yin_shen")
         if FORMATION_RULES["gate_sun"].issubset(stars_in_frame) and (
             self._has_stars_in_palace({"ju_men", "tai_yang"}, 3)
@@ -258,9 +255,7 @@ class ChartAnalyzer:
                     description = interaction_descriptions.get(interaction)
                     if description:
                         interaction_info = f" [Tương tác Ngũ Hành: {description}]"
-            readings.append(
-                {"star": star.key, "interpretation": f"{text}{interaction_info}"}
-            )
+            readings.append({"star": star.key, "interpretation": f"{text}{interaction_info}"})
         return readings
 
     def interpret_all_palaces(self) -> dict[str, list[dict[str, str]]]:

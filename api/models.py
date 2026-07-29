@@ -1,9 +1,9 @@
 """Pydantic models for API request/response validation (English keys, API v2)."""
-from datetime import datetime
-from typing import Any, Literal, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from datetime import date, datetime
+from typing import Any, Literal
 
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 MIAO_WANG_LABELS = {
     "M": "Miếu",
@@ -59,8 +59,8 @@ class BirthInfoRequest(BaseModel):
     gender: Literal[1, -1] = Field(..., description="1=male, -1=female")
     is_solar: bool = Field(True, description="True if Gregorian date, False if lunar")
     timezone: int = Field(7, ge=-12, le=14, description="Timezone offset (default +7 VN)")
-    name: Optional[str] = Field(None, max_length=100, description="Optional display name")
-    view_year: Optional[int] = Field(
+    name: str | None = Field(None, max_length=100, description="Optional display name")
+    view_year: int | None = Field(
         None,
         ge=1900,
         le=2200,
@@ -73,6 +73,17 @@ class BirthInfoRequest(BaseModel):
         if not 1 <= v <= 12:
             raise ValueError("hour must be 1-12 (Zi=1 ... Hai=12)")
         return v
+
+    @model_validator(mode="after")
+    def validate_birth_date(self) -> "BirthInfoRequest":
+        if self.is_solar:
+            try:
+                date(self.year, self.month, self.day)
+            except ValueError as exc:
+                raise ValueError("invalid Gregorian birth date") from exc
+        elif self.day > 30:
+            raise ValueError("lunar birth day must be in 1..30")
+        return self
 
 
 class LunarDateResponse(BaseModel):
@@ -105,37 +116,37 @@ class StemBranchResponse(BaseModel):
     year_stem_name: str
     year_branch_name: str
 
-    month_branch: Optional[int] = None
-    month_stem_name: Optional[str] = None
-    month_branch_name: Optional[str] = None
-    day_stem: Optional[int] = None
-    day_branch: Optional[int] = None
-    day_stem_name: Optional[str] = None
-    day_branch_name: Optional[str] = None
-    hour_stem: Optional[int] = None
-    hour_branch: Optional[int] = None
-    hour_stem_name: Optional[str] = None
-    hour_branch_name: Optional[str] = None
-    year: Optional[StemBranchPair] = None
-    month: Optional[StemBranchPair] = None
-    day: Optional[StemBranchPair] = None
-    hour: Optional[StemBranchPair] = None
+    month_branch: int | None = None
+    month_stem_name: str | None = None
+    month_branch_name: str | None = None
+    day_stem: int | None = None
+    day_branch: int | None = None
+    day_stem_name: str | None = None
+    day_branch_name: str | None = None
+    hour_stem: int | None = None
+    hour_branch: int | None = None
+    hour_stem_name: str | None = None
+    hour_branch_name: str | None = None
+    year: StemBranchPair | None = None
+    month: StemBranchPair | None = None
+    day: StemBranchPair | None = None
+    hour: StemBranchPair | None = None
 
 
 class StarInfo(BaseModel):
     id: int
     name: str
-    element: Optional[str] = None
-    category: Optional[int] = None
-    category_label: Optional[str] = None
-    miao_wang: Optional[str] = None
-    miao_wang_label: Optional[str] = None
-    mutagen: Optional[str] = None
-    direction: Optional[str] = None
-    yin_yang: Optional[Any] = None
+    element: str | None = None
+    category: int | None = None
+    category_label: str | None = None
+    miao_wang: str | None = None
+    miao_wang_label: str | None = None
+    mutagen: str | None = None
+    direction: str | None = None
+    yin_yang: Any | None = None
     is_chang_sheng: bool = False
-    is_auspicious: Optional[bool] = None
-    palace_position: Optional[int] = None
+    is_auspicious: bool | None = None
+    palace_position: int | None = None
 
 
 class StarInterpretation(BaseModel):
@@ -156,33 +167,33 @@ class ChartFormation(BaseModel):
 class PalaceInfo(BaseModel):
     index: int = Field(..., ge=1, le=12)
     branch_name: str
-    palace_name: Optional[str] = None
+    palace_name: str | None = None
     palace_element: str
     yin_yang: int
-    stem: Optional[int] = None
-    stem_name: Optional[str] = None
-    stars: list[StarInfo] = []
-    interpretations: list[StarInterpretation] = []
-    da_xian_age: Optional[int] = None
-    xiao_xian_branch: Optional[str] = None
-    yue_xian: Optional[int] = None
+    stem: int | None = None
+    stem_name: str | None = None
+    stars: list[StarInfo] = Field(default_factory=list)
+    interpretations: list[StarInterpretation] = Field(default_factory=list)
+    da_xian_age: int | None = None
+    xiao_xian_branch: str | None = None
+    yue_xian: int | None = None
     is_body_palace: bool = False
     is_xun: bool = False
     is_triet: bool = False
 
 
 class ChartMeta(BaseModel):
-    ben_ming_name: Optional[str] = None
-    nayin: Optional[str] = None
-    year_yin_yang: Optional[str] = None
-    life_yin_yang_status: Optional[str] = None
-    ming_zhu: Optional[str] = None
-    shen_zhu: Optional[str] = None
-    sheng_ke_status: Optional[str] = None
-    wu_xing_ju_name: Optional[str] = None
-    wu_xing_ju: Optional[int] = None
-    view_year: Optional[int] = None
-    view_year_branch: Optional[str] = None
+    ben_ming_name: str | None = None
+    nayin: str | None = None
+    year_yin_yang: str | None = None
+    life_yin_yang_status: str | None = None
+    ming_zhu: str | None = None
+    shen_zhu: str | None = None
+    sheng_ke_status: str | None = None
+    wu_xing_ju_name: str | None = None
+    wu_xing_ju: int | None = None
+    view_year: int | None = None
+    view_year_branch: str | None = None
 
 
 class EarthPlateResponse(BaseModel):
@@ -193,9 +204,9 @@ class EarthPlateResponse(BaseModel):
     wu_xing_ju: int
     wu_xing_ju_name: str
     palaces: list[PalaceInfo]
-    formations: list[ChartFormation] = []
-    taboo_palaces: list[str] = []
-    chart_meta: Optional[ChartMeta] = None
+    formations: list[ChartFormation] = Field(default_factory=list)
+    taboo_palaces: list[str] = Field(default_factory=list)
+    chart_meta: ChartMeta | None = None
 
 
 class ChartResponse(BaseModel):
@@ -203,8 +214,8 @@ class ChartResponse(BaseModel):
     lunar_date: LunarDateResponse
     stem_branch: StemBranchResponse
     earth_plate: EarthPlateResponse
-    formations: list[ChartFormation] = []
-    chart_meta: Optional[ChartMeta] = None
+    formations: list[ChartFormation] = Field(default_factory=list)
+    chart_meta: ChartMeta | None = None
     generated_at: datetime = Field(default_factory=datetime.now)
 
 
@@ -216,7 +227,7 @@ class HealthResponse(BaseModel):
 
 class ErrorResponse(BaseModel):
     error: str
-    detail: Optional[str] = None
+    detail: str | None = None
     timestamp: datetime = Field(default_factory=datetime.now)
 
 
@@ -246,9 +257,9 @@ class PalaceAnalysis(BaseModel):
 
 class ChartAnalysisResponse(BaseModel):
     birth_info: BirthInfoRequest
-    life_palace_analysis: Optional[PalaceAnalysis] = None
-    career_palace_analysis: Optional[PalaceAnalysis] = None
-    wealth_palace_analysis: Optional[PalaceAnalysis] = None
+    life_palace_analysis: PalaceAnalysis | None = None
+    career_palace_analysis: PalaceAnalysis | None = None
+    wealth_palace_analysis: PalaceAnalysis | None = None
     overall_strength: str
     lucky_elements: list[str]
     unlucky_elements: list[str]
@@ -259,14 +270,14 @@ class ChartAnalysisResponse(BaseModel):
 class StarCatalogItem(BaseModel):
     id: int
     name: str
-    element: Optional[str] = None
-    category: Optional[int] = None
-    category_label: Optional[str] = None
-    direction: Optional[str] = None
-    yin_yang: Optional[Any] = None
+    element: str | None = None
+    category: int | None = None
+    category_label: str | None = None
+    direction: str | None = None
+    yin_yang: Any | None = None
     is_chang_sheng: bool = False
-    description: Optional[str] = None
-    meaning: Optional[str] = None
+    description: str | None = None
+    meaning: str | None = None
 
 
 class StarCatalogResponse(BaseModel):

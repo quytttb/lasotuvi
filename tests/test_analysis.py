@@ -1,5 +1,6 @@
 """Logic-layer tests against engine-neutral canonical fixtures."""
-from lasotuvi.analysis import ChartAnalyzer, FORMATION_RULES, MAJOR_STAR_KEYS
+
+from lasotuvi.analysis import FORMATION_RULES, MAJOR_STAR_KEYS, ChartAnalyzer
 from lasotuvi.canonical import CanonicalChart, CanonicalPalace, CanonicalStar
 
 

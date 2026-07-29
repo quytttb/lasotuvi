@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Demo: build a Zi Wei Dou Shu chart."""
+
 from lasotuvi.chart_builder import build_earth_plate
 from lasotuvi.heaven_plate import HeavenPlate
 

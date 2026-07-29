@@ -5,24 +5,4 @@
 fastapi>=0.115.0
 uvicorn[standard]>=0.32.0  # ASGI server with auto-reload
 
-# Data validation and serialization
-pydantic>=2.10.0
-pydantic-settings>=2.7.0
-
-# Chart engine (kept here as API deployments install this file directly)
-py-iztro>=0.1.5,<0.2
-
-# HTTP client for testing
-httpx>=0.28.0
-
-# Optional: API rate limiting
-slowapi>=0.1.9
-
-# Optional: API authentication
-python-jose[cryptography]>=3.3.0
-passlib[bcrypt]>=1.7.4
-python-multipart>=0.0.20
-
-# Optional: Database (if needed later)
-# sqlalchemy>=2.0.36
-# alembic>=1.14.0
+# Install requirements.txt alongside this file for the chart engine.

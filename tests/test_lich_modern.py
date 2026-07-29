@@ -2,10 +2,16 @@
 Modern test suite for Lich conversion functions
 """
 
-
 import pytest
 
-from lasotuvi.lunar_calendar import lunar_to_solar, solar_to_lunar, new_moon, get_sun_longitude, julian_day_from_date, julian_day_to_date
+from lasotuvi.lunar_calendar import (
+    get_sun_longitude,
+    julian_day_from_date,
+    julian_day_to_date,
+    lunar_to_solar,
+    new_moon,
+    solar_to_lunar,
+)
 
 
 class TestJulianDayConversion:

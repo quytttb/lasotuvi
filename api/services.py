@@ -1,22 +1,9 @@
 """Service layer for Zi Wei Dou Shu chart calculations."""
+
 from __future__ import annotations
 
 from datetime import date
-from typing import Any, Optional
-
-from lasotuvi.analysis import ChartAnalyzer
-from lasotuvi.canonical import CanonicalChart, CanonicalStar
-from lasotuvi.iztro_adapter import build_canonical_chart
-from lasotuvi.stem_branch import (
-    day_stem_branch,
-    EARTHLY_BRANCHES,
-    generation_control,
-    month_year_stem_branch,
-    five_element,
-    HEAVENLY_STEMS,
-    nayin_element,
-)
-from lasotuvi.lunar_calendar import julian_day_from_date, lunar_to_solar, solar_to_lunar
+from typing import Any
 
 from api.models import (
     MIAO_WANG_LABELS,
@@ -39,6 +26,19 @@ from api.models import (
     StemBranchResponse,
 )
 from api.star_catalog import SAO_CATALOG
+from lasotuvi.analysis import ChartAnalyzer
+from lasotuvi.canonical import CanonicalChart, CanonicalStar
+from lasotuvi.iztro_adapter import build_canonical_chart
+from lasotuvi.lunar_calendar import julian_day_from_date, lunar_to_solar, solar_to_lunar
+from lasotuvi.stem_branch import (
+    EARTHLY_BRANCHES,
+    HEAVENLY_STEMS,
+    day_stem_branch,
+    five_element,
+    generation_control,
+    month_year_stem_branch,
+    nayin_element,
+)
 
 HOUR_BRANCH_RANGES: dict[int, str] = {
     1: "23h - 1h",
@@ -54,6 +54,7 @@ HOUR_BRANCH_RANGES: dict[int, str] = {
     11: "19h - 21h",
     12: "21h - 23h",
 }
+
 
 def _pair(stem: int, branch: int) -> StemBranchPair:
     stem_name = HEAVENLY_STEMS[stem]["stem_name"]
@@ -133,7 +134,7 @@ class TuViService:
         year: int,
         is_solar: bool = True,
         timezone: int = 7,
-        hour: Optional[int] = None,
+        hour: int | None = None,
     ) -> StemBranchResponse:
         if is_solar:
             lunar = solar_to_lunar(day, month, year, timezone)
@@ -148,9 +149,7 @@ class TuViService:
             lunar_day, lunar_month, lunar_year, False, timezone
         )
         month_branch = lunar_month
-        day_stem, day_branch = day_stem_branch(
-            solar_day, solar_month, solar_year, True, timezone
-        )
+        day_stem, day_branch = day_stem_branch(solar_day, solar_month, solar_year, True, timezone)
 
         hour_branch = hour
         hour_stem = None
@@ -203,7 +202,7 @@ class TuViService:
         chart: CanonicalChart,
         year_stem: int,
         year_branch: int,
-        view_year: Optional[int],
+        view_year: int | None,
     ) -> ChartMeta:
         view_year_branch = None
         if view_year is not None:
@@ -354,7 +353,9 @@ class TuViService:
                 name=s["ten"],
                 element=s.get("ngu_hanh"),
                 category=s.get("loai"),
-                category_label=STAR_CATEGORY_LABELS.get(s["loai"]) if s.get("loai") is not None else None,
+                category_label=(
+                    STAR_CATEGORY_LABELS.get(s["loai"]) if s.get("loai") is not None else None
+                ),
                 direction=s.get("phuong_vi"),
                 yin_yang=s.get("am_duong"),
                 is_chang_sheng=bool(s.get("vong_trang_sinh")),

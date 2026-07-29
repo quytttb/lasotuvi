@@ -1,10 +1,19 @@
 """Adapter from :mod:`py_iztro` output to the engine-neutral canonical model."""
+
 from __future__ import annotations
 
+import atexit
 import hashlib
+import json
+import logging
+import os
 import re
+import subprocess
+import sys
+import uuid
 from collections.abc import Mapping
-from concurrent.futures import ThreadPoolExecutor
+from queue import Empty, Queue
+from threading import Lock, Thread
 from typing import Any
 
 from lasotuvi.canonical import CanonicalChart, CanonicalPalace, CanonicalStar
@@ -210,11 +219,129 @@ _TYPE_CATEGORY = {
     "adjective": 2,
 }
 
-# pythonmonkey owns a process-global JavaScript runtime and is not safe when
-# separate FastAPI worker threads repeatedly initialize Astro. Keep all native
-# runtime access on one dedicated thread and reuse one Astro instance.
-_IZTRO_EXECUTOR = ThreadPoolExecutor(max_workers=1, thread_name_prefix="py-iztro")
-_ASTRO_INSTANCE: Any = None
+logger = logging.getLogger(__name__)
+
+
+class IztroRuntimeError(RuntimeError):
+    """Base error raised when the isolated py-iztro runtime cannot respond."""
+
+
+class IztroUnavailableError(IztroRuntimeError):
+    """The py-iztro dependency or its JavaScript runtime is unavailable."""
+
+
+class IztroBusyError(IztroRuntimeError):
+    """The single safe py-iztro worker is already serving another request."""
+
+
+class IztroTimeoutError(IztroRuntimeError):
+    """The isolated py-iztro worker exceeded its execution deadline."""
+
+
+def _positive_float_env(name: str, default: float) -> float:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    try:
+        value = float(raw)
+    except ValueError:
+        logger.warning("Ignoring invalid %s=%r", name, raw)
+        return default
+    return value if value > 0 else default
+
+
+_IZTRO_TIMEOUT_SECONDS = _positive_float_env("LASOTUVI_IZTRO_TIMEOUT_SECONDS", 15.0)
+_IZTRO_BUSY_TIMEOUT_SECONDS = _positive_float_env("LASOTUVI_IZTRO_BUSY_TIMEOUT_SECONDS", 2.0)
+_IZTRO_LOCK = Lock()
+_IZTRO_PROCESS: subprocess.Popen[str] | None = None
+_IZTRO_RESPONSE_QUEUE: Queue[dict[str, Any]] | None = None
+
+
+def _read_worker_responses(stream: Any, response_queue: Queue[dict[str, Any]]) -> None:
+    for line in stream:
+        try:
+            response_queue.put(json.loads(line))
+        except json.JSONDecodeError:
+            logger.error("py-iztro worker returned malformed JSON")
+
+
+def _start_iztro_process() -> None:
+    global _IZTRO_PROCESS, _IZTRO_RESPONSE_QUEUE
+    if _IZTRO_PROCESS is not None and _IZTRO_PROCESS.poll() is None:
+        return
+    _IZTRO_RESPONSE_QUEUE = Queue(maxsize=2)
+    _IZTRO_PROCESS = subprocess.Popen(
+        [sys.executable, "-m", "lasotuvi.iztro_worker"],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+        bufsize=1,
+    )
+    assert _IZTRO_PROCESS.stdout is not None
+    Thread(
+        target=_read_worker_responses,
+        args=(_IZTRO_PROCESS.stdout, _IZTRO_RESPONSE_QUEUE),
+        name="py-iztro-reader",
+        daemon=True,
+    ).start()
+    try:
+        response = _IZTRO_RESPONSE_QUEUE.get(timeout=_IZTRO_TIMEOUT_SECONDS)
+    except Empty as exc:
+        _stop_iztro_process(graceful=False)
+        raise IztroTimeoutError("py-iztro worker initialization timed out") from exc
+    if (
+        response.get("id") is not None
+        or not response.get("ok")
+        or response.get("payload") != "ready"
+    ):
+        _stop_iztro_process(graceful=False)
+        raise IztroUnavailableError("py-iztro runtime is unavailable")
+
+
+def _stop_iztro_process(*, graceful: bool) -> None:
+    global _IZTRO_PROCESS, _IZTRO_RESPONSE_QUEUE
+    process = _IZTRO_PROCESS
+    if process is not None and process.poll() is None and graceful and process.stdin is not None:
+        try:
+            process.stdin.write('{"command":"shutdown"}\n')
+            process.stdin.flush()
+            process.wait(timeout=2)
+        except (BrokenPipeError, subprocess.TimeoutExpired):
+            pass
+    if process is not None and process.poll() is None:
+        process.terminate()
+        try:
+            process.wait(timeout=2)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait(timeout=2)
+    if process is not None:
+        if process.stdin is not None:
+            process.stdin.close()
+        if process.stdout is not None:
+            process.stdout.close()
+    _IZTRO_PROCESS = None
+    _IZTRO_RESPONSE_QUEUE = None
+
+
+def shutdown_iztro_runtime() -> None:
+    """Release the isolated JavaScript runtime during API or interpreter shutdown."""
+    if _IZTRO_LOCK.acquire(timeout=2):
+        try:
+            _stop_iztro_process(graceful=True)
+        finally:
+            _IZTRO_LOCK.release()
+
+
+def initialize_iztro_runtime() -> None:
+    """Start and validate the isolated JavaScript runtime before serving traffic."""
+    if not _IZTRO_LOCK.acquire(timeout=_IZTRO_BUSY_TIMEOUT_SECONDS):
+        raise IztroBusyError("py-iztro worker is busy")
+    try:
+        _start_iztro_process()
+    finally:
+        _IZTRO_LOCK.release()
 
 
 def hour_branch_to_iztro_time_index(hour_branch: int) -> int:
@@ -250,22 +377,50 @@ def get_astro_data(
     *,
     is_solar: bool = True,
 ) -> Any:
-    """Generate a py-iztro model using stable Vietnamese source labels."""
+    """Generate py-iztro data in an isolated, time-bounded subprocess."""
     if not 0 <= time_index <= 12:
         raise ValueError("iztro time index must be in 0..12")
-
-    def generate() -> Any:
-        global _ASTRO_INSTANCE
+    if not _IZTRO_LOCK.acquire(timeout=_IZTRO_BUSY_TIMEOUT_SECONDS):
+        raise IztroBusyError("py-iztro worker is busy")
+    try:
+        _start_iztro_process()
+        assert _IZTRO_PROCESS is not None
+        assert _IZTRO_PROCESS.stdin is not None
+        assert _IZTRO_RESPONSE_QUEUE is not None
+        request_id = uuid.uuid4().hex
         try:
-            from py_iztro import Astro
-        except ImportError as exc:  # pragma: no cover - broken deployment only
-            raise RuntimeError("py-iztro is required for chart generation") from exc
-        if _ASTRO_INSTANCE is None:
-            _ASTRO_INSTANCE = Astro()
-        method = _ASTRO_INSTANCE.by_solar if is_solar else _ASTRO_INSTANCE.by_lunar
-        return method(date, time_index, _gender_label(gender), language="vi-VN")
-
-    return _IZTRO_EXECUTOR.submit(generate).result()
+            _IZTRO_PROCESS.stdin.write(
+                json.dumps(
+                    {
+                        "id": request_id,
+                        "date": date,
+                        "time_index": time_index,
+                        "gender": _gender_label(gender),
+                        "is_solar": is_solar,
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
+            _IZTRO_PROCESS.stdin.flush()
+        except BrokenPipeError as exc:
+            _stop_iztro_process(graceful=False)
+            raise IztroUnavailableError("py-iztro worker stopped unexpectedly") from exc
+        try:
+            response = _IZTRO_RESPONSE_QUEUE.get(timeout=_IZTRO_TIMEOUT_SECONDS)
+        except Empty as exc:
+            _stop_iztro_process(graceful=False)
+            raise IztroTimeoutError("py-iztro worker timed out") from exc
+        if response.get("id") != request_id:
+            _stop_iztro_process(graceful=False)
+            raise IztroRuntimeError("py-iztro worker returned an invalid response")
+        if response.get("ok"):
+            return response.get("payload")
+        if response.get("kind") == "value":
+            raise ValueError(response.get("detail"))
+        raise IztroRuntimeError("py-iztro chart generation failed")
+    finally:
+        _IZTRO_LOCK.release()
 
 
 def _as_mapping(raw: Any) -> Mapping[str, Any]:
@@ -368,13 +523,9 @@ def _year_pillar(chinese_date: str) -> tuple[str | None, str | None]:
     first = chinese_date.split(" - ", 1)[0].strip()
     parts = first.split()
     if len(parts) >= 2:
-        return STEM_NAME_MAP.get(_normalized(parts[0])), BRANCH_NAME_MAP.get(
-            _normalized(parts[1])
-        )
+        return STEM_NAME_MAP.get(_normalized(parts[0])), BRANCH_NAME_MAP.get(_normalized(parts[1]))
     if len(first) >= 2:
-        return STEM_NAME_MAP.get(_normalized(first[0])), BRANCH_NAME_MAP.get(
-            _normalized(first[1])
-        )
+        return STEM_NAME_MAP.get(_normalized(first[0])), BRANCH_NAME_MAP.get(_normalized(first[1]))
     return None, None
 
 
@@ -506,14 +657,23 @@ def build_canonical_chart(
     )
 
 
+atexit.register(shutdown_iztro_runtime)
+
+
 __all__ = [
     "BRANCH_NAME_MAP",
     "PALACE_NAME_MAP",
     "STAR_NAME_MAP",
     "STEM_NAME_MAP",
+    "IztroBusyError",
+    "IztroRuntimeError",
+    "IztroTimeoutError",
+    "IztroUnavailableError",
     "build_canonical_chart",
     "get_astro_data",
     "hour_branch_to_iztro_time_index",
+    "initialize_iztro_runtime",
     "iztro_time_index_to_hour_branch",
+    "shutdown_iztro_runtime",
     "to_canonical",
 ]

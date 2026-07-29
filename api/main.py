@@ -1,8 +1,13 @@
 """FastAPI application — LasoTuVi REST API v2 (English JSON schema)."""
-from contextlib import asynccontextmanager
-import time
 
-from fastapi import FastAPI, HTTPException, status
+import logging
+import os
+import uuid
+from collections.abc import AsyncIterator, Awaitable, Callable
+from contextlib import asynccontextmanager
+from time import perf_counter
+
+from fastapi import FastAPI, HTTPException, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -22,13 +27,34 @@ from api.models import (
     StemBranchResponse,
 )
 from api.services import TuViService
+from lasotuvi.iztro_adapter import (
+    IztroRuntimeError,
+    initialize_iztro_runtime,
+    shutdown_iztro_runtime,
+)
+
+logger = logging.getLogger(__name__)
+
+
+def _environment_flag(name: str, default: bool = False) -> bool:
+    value = os.getenv(name)
+    return default if value is None else value.casefold() in {"1", "true", "yes", "on"}
+
+
+def _cors_origins() -> list[str]:
+    value = os.getenv("LASOTUVI_CORS_ORIGINS", "*")
+    return [origin.strip() for origin in value.split(",") if origin.strip()]
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    print(f"LasoTuVi API v{__version__} starting...")
-    yield
-    print("LasoTuVi API shutting down...")
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    logger.info("LasoTuVi API v%s starting", __version__)
+    initialize_iztro_runtime()
+    try:
+        yield
+    finally:
+        shutdown_iztro_runtime()
+        logger.info("LasoTuVi API shutting down")
 
 
 app = FastAPI(
@@ -61,29 +87,58 @@ Breaking v2 schema: English field names throughout.
     },
 )
 
+cors_origins = _cors_origins()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=cors_origins,
+    allow_credentials=(
+        _environment_flag("LASOTUVI_CORS_ALLOW_CREDENTIALS") and "*" not in cors_origins
+    ),
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
 @app.middleware("http")
-async def log_requests(request, call_next):
-    start = time.time()
+async def log_requests(
+    request: Request,
+    call_next: Callable[[Request], Awaitable[Response]],
+) -> Response:
+    start = perf_counter()
+    request_id = request.headers.get("X-Request-ID") or uuid.uuid4().hex
+    request.state.request_id = request_id
     response = await call_next(request)
-    response.headers["X-Process-Time"] = str(time.time() - start)
-    print(f"{request.method} {request.url.path} — {response.status_code}")
+    duration = perf_counter() - start
+    response.headers["X-Process-Time"] = f"{duration:.6f}"
+    response.headers["X-Request-ID"] = request_id
+    logger.info(
+        "%s %s status=%s duration=%.6fs request_id=%s",
+        request.method,
+        request.url.path,
+        response.status_code,
+        duration,
+        request_id,
+    )
     return response
 
 
+@app.exception_handler(IztroRuntimeError)
+async def iztro_exception_handler(request: Request, exc: IztroRuntimeError) -> JSONResponse:
+    request_id = getattr(request.state, "request_id", None)
+    logger.error("Chart engine error request_id=%s: %s", request_id, exc)
+    return JSONResponse(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        content={"error": "Chart engine unavailable", "request_id": request_id},
+    )
+
+
 @app.exception_handler(Exception)
-async def global_exception_handler(request, exc):
+async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    request_id = getattr(request.state, "request_id", None)
+    logger.exception("Unhandled API error request_id=%s", request_id, exc_info=exc)
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"error": "Internal Server Error", "detail": str(exc)},
+        content={"error": "Internal Server Error", "request_id": request_id},
     )
 
 
@@ -107,6 +162,12 @@ async def root():
 @app.get("/health", response_model=HealthResponse, tags=["Meta"])
 async def health_check():
     return HealthResponse(status="healthy", version=__version__)
+
+
+@app.get("/ready", response_model=HealthResponse, tags=["Meta"])
+def readiness_check():
+    initialize_iztro_runtime()
+    return HealthResponse(status="ready", version=__version__)
 
 
 @app.post("/calendar/solar-to-lunar", response_model=LunarDateResponse, tags=["Calendar"])
@@ -147,7 +208,9 @@ async def get_stem_branch(
 
 
 # Backward-compatible alias
-@app.post("/calendar/can-chi", response_model=StemBranchResponse, tags=["Calendar"], deprecated=True)
+@app.post(
+    "/calendar/can-chi", response_model=StemBranchResponse, tags=["Calendar"], deprecated=True
+)
 async def get_can_chi_alias(
     day: int | None = None,
     month: int | None = None,
@@ -173,50 +236,46 @@ async def get_can_chi_alias(
 
 
 @app.post("/chart/earth-plate", response_model=EarthPlateResponse, tags=["Chart"])
-async def generate_earth_plate(birth_info: BirthInfoRequest):
+def generate_earth_plate(birth_info: BirthInfoRequest):
     try:
         return TuViService.create_earth_plate(birth_info)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @app.post("/chart/dia-ban", response_model=EarthPlateResponse, tags=["Chart"], deprecated=True)
-async def generate_dia_ban_alias(birth_info: BirthInfoRequest):
+def generate_dia_ban_alias(birth_info: BirthInfoRequest):
     """Deprecated: use `/chart/earth-plate`."""
-    return await generate_earth_plate(birth_info)
+    return generate_earth_plate(birth_info)
 
 
 @app.post("/chart/generate", response_model=ChartResponse, tags=["Chart"])
-async def generate_chart(birth_info: BirthInfoRequest):
+def generate_chart(birth_info: BirthInfoRequest):
     try:
-        start = time.time()
+        start = perf_counter()
         chart = TuViService.generate_full_chart(birth_info)
-        print(f"Chart generated in {time.time() - start:.3f}s")
+        logger.debug("Chart generated in %.3fs", perf_counter() - start)
         return chart
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @app.post("/chart/analyze", response_model=ChartAnalysisResponse, tags=["Chart", "Analysis"])
-async def analyze_chart(birth_info: BirthInfoRequest):
-    try:
-        return TuViService.analyze_chart(birth_info)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+def analyze_chart(birth_info: BirthInfoRequest):
+    return TuViService.analyze_chart(birth_info)
 
 
 @app.post("/chart/batch", response_model=BatchChartResponse, tags=["Chart", "Batch"])
-async def generate_batch_charts(batch_request: BatchChartRequest):
+def generate_batch_charts(batch_request: BatchChartRequest):
     results = []
     successful = failed = 0
     for birth_info in batch_request.charts:
         try:
             results.append(TuViService.generate_full_chart(birth_info))
             successful += 1
-        except Exception as e:
-            results.append(ErrorResponse(error="Chart generation failed", detail=str(e)))
+        except Exception:
+            logger.exception("Batch chart generation failed")
+            results.append(ErrorResponse(error="Chart generation failed"))
             failed += 1
     return BatchChartResponse(
         total=len(batch_request.charts),
@@ -278,15 +337,6 @@ async def get_elements_info():
 async def get_stem_branch_info():
     from lasotuvi.stem_branch import EARTHLY_BRANCHES, HEAVENLY_STEMS
 
-    stems = [
-        {
-            "id": i,
-            "name": HEAVENLY_STEMS[i]["stem_name"],
-            "element": HEAVENLY_STEMS[i].get("nguHanh") or HEAVENLY_STEMS[i].get("element"),
-        }
-        for i in range(1, 11)
-    ]
-    # fix element key after rename
     stems = []
     for i in range(1, 11):
         can = HEAVENLY_STEMS[i]

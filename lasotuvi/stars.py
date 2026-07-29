@@ -1,6 +1,7 @@
 """
 (c) 2016 doanguyen <dungnv2410@gmail.com>.
 """
+
 from lasotuvi.stem_branch import five_element
 
 
@@ -24,8 +25,15 @@ class Star:
     """
 
     def __init__(
-        self, star_id, name, element, category=2, direction="", yin_yang="", is_chang_sheng=0
-    ):
+        self,
+        star_id: int,
+        name: str,
+        element: str,
+        category: int = 2,
+        direction: str = "",
+        yin_yang: int | str = "",
+        is_chang_sheng: int = 0,
+    ) -> None:
         super().__init__()
         self.star_id = star_id
         self.name = name
@@ -35,9 +43,10 @@ class Star:
         self.yin_yang = yin_yang
         self.is_chang_sheng = is_chang_sheng
         self.element_css = five_element(element)["css"]
-        self.miao_wang = None
+        self.miao_wang: str | None = None
+        self.palace_position: int | None = None
 
-    def set_miao_wang(self, dacTinh):
+    def set_miao_wang(self, dacTinh: str) -> "Star":
         """An Đặc tính cho sao: V, M, Đ, B, H
         Args: miao_wang (str): Đặc tính của sao, Vượng (V), Miếu (M),
                                 Đắc (Đ), Bình (B), Hãm (H)
@@ -49,7 +58,7 @@ class Star:
         # self.element_css = dt[dacTinh]
         return self
 
-    def set_palace_position(self, palace_position):
+    def set_palace_position(self, palace_position: int) -> "Star":
         """Summary
 
         Returns:

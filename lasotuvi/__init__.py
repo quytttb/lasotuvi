@@ -1,4 +1,5 @@
 """lasotuvi — Zi Wei Dou Shu chart engine."""
+
 __title__ = "lasotuvi"
 __version__ = "2.0.0"
 __author__ = "doanguyen / quytttb"

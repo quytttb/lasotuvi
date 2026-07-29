@@ -1,8 +1,10 @@
 """Advanced API endpoint tests (English schema v2)."""
-import pytest
+
 from fastapi.testclient import TestClient
 
 from api.main import app
+from api.services import TuViService
+from lasotuvi.iztro_adapter import IztroTimeoutError
 
 client = TestClient(app)
 
@@ -43,6 +45,51 @@ class TestBatchEndpoints:
         data = response.json()
         assert data["total"] == 2
         assert data["successful"] == 2
+
+    def test_batch_does_not_expose_internal_errors(self, monkeypatch):
+        def fail(_birth):
+            raise RuntimeError("private implementation detail")
+
+        monkeypatch.setattr(TuViService, "generate_full_chart", fail)
+        response = client.post("/chart/batch", json={"charts": [BIRTH]})
+        assert response.status_code == 200
+        assert response.json()["results"][0]["detail"] is None
+
+
+class TestProductionSafety:
+    def test_internal_error_response_is_generic(self, monkeypatch):
+        def fail(_birth):
+            raise RuntimeError("private implementation detail")
+
+        monkeypatch.setattr(TuViService, "generate_full_chart", fail)
+        safe_client = TestClient(app, raise_server_exceptions=False)
+        response = safe_client.post("/chart/generate", json=BIRTH)
+        assert response.status_code == 500
+        assert "private implementation detail" not in response.text
+        assert response.json()["request_id"]
+
+    def test_engine_timeout_returns_service_unavailable(self, monkeypatch):
+        def fail(_birth):
+            raise IztroTimeoutError("private engine detail")
+
+        monkeypatch.setattr(TuViService, "generate_full_chart", fail)
+        safe_client = TestClient(app, raise_server_exceptions=False)
+        response = safe_client.post("/chart/generate", json=BIRTH)
+        assert response.status_code == 503
+        assert response.json()["error"] == "Chart engine unavailable"
+        assert "private engine detail" not in response.text
+
+    def test_default_cors_does_not_enable_credentials(self):
+        response = client.options(
+            "/health",
+            headers={
+                "Origin": "https://example.com",
+                "Access-Control-Request-Method": "GET",
+            },
+        )
+        assert response.status_code == 200
+        assert response.headers["Access-Control-Allow-Origin"] == "*"
+        assert "Access-Control-Allow-Credentials" not in response.headers
 
 
 class TestInfoEndpoints:
