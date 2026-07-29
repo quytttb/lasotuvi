@@ -1,2 +1,3 @@
 # Core dependencies for lasotuvi library
 ephem>=4.1.5
+py-iztro>=0.1.5,<0.2

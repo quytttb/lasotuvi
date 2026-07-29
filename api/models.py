@@ -130,6 +130,7 @@ class StarInfo(BaseModel):
     category_label: Optional[str] = None
     miao_wang: Optional[str] = None
     miao_wang_label: Optional[str] = None
+    mutagen: Optional[str] = None
     direction: Optional[str] = None
     yin_yang: Optional[Any] = None
     is_chang_sheng: bool = False
@@ -193,6 +194,7 @@ class EarthPlateResponse(BaseModel):
     wu_xing_ju_name: str
     palaces: list[PalaceInfo]
     formations: list[ChartFormation] = []
+    taboo_palaces: list[str] = []
     chart_meta: Optional[ChartMeta] = None
 
 

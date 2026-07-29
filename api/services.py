@@ -5,18 +5,18 @@ from datetime import date
 from typing import Any, Optional
 
 from lasotuvi.analysis import ChartAnalyzer
+from lasotuvi.canonical import CanonicalChart, CanonicalStar
+from lasotuvi.iztro_adapter import build_canonical_chart
 from lasotuvi.stem_branch import (
     day_stem_branch,
     EARTHLY_BRANCHES,
+    generation_control,
     month_year_stem_branch,
     five_element,
     HEAVENLY_STEMS,
-    find_wu_xing_ju,
+    nayin_element,
 )
-from lasotuvi.chart_builder import build_earth_plate
-from lasotuvi.earth_plate import EarthPlate
 from lasotuvi.lunar_calendar import julian_day_from_date, lunar_to_solar, solar_to_lunar
-from lasotuvi.heaven_plate import HeavenPlate
 
 from api.models import (
     MIAO_WANG_LABELS,
@@ -55,20 +55,6 @@ HOUR_BRANCH_RANGES: dict[int, str] = {
     12: "21h - 23h",
 }
 
-_STEM_OF_YIN: dict[int, int] = {
-    1: 3,
-    2: 5,
-    3: 7,
-    4: 9,
-    5: 1,
-    6: 3,
-    7: 5,
-    8: 7,
-    9: 9,
-    10: 1,
-}
-
-
 def _pair(stem: int, branch: int) -> StemBranchPair:
     stem_name = HEAVENLY_STEMS[stem]["stem_name"]
     branch_name = EARTHLY_BRANCHES[branch]["branch_name"]
@@ -81,47 +67,21 @@ def _pair(stem: int, branch: int) -> StemBranchPair:
     )
 
 
-def _normalize_star(raw: dict[str, Any]) -> StarInfo:
-    star_id = int(raw.get("star_id") or raw.get("id") or 0)
-    name = raw.get("name") or raw.get("saoTen") or ""
-    category = raw.get("category", raw.get("saoLoai"))
-    try:
-        category_int = int(category) if category is not None else None
-    except (TypeError, ValueError):
-        category_int = None
-
-    miao_wang = raw.get("miao_wang") or raw.get("saoDacTinh")
-    if miao_wang == "D":
-        miao_wang = "Đ"
-
-    is_auspicious: Optional[bool] = None
-    if category_int is not None:
-        is_auspicious = category_int < 10
-
+def _star_to_api(star: CanonicalStar) -> StarInfo:
+    """Serialize a canonical star without exposing py-iztro's source schema."""
     return StarInfo(
-        id=star_id,
-        name=name,
-        element=raw.get("element") or raw.get("saoNguHanh"),
-        category=category_int,
-        category_label=STAR_CATEGORY_LABELS.get(category_int) if category_int is not None else None,
-        miao_wang=miao_wang,
-        miao_wang_label=MIAO_WANG_LABELS.get(miao_wang) if miao_wang else None,
-        direction=raw.get("direction") or raw.get("saoPhuongVi") or None,
-        yin_yang=raw.get("yin_yang", raw.get("saoAmDuong")),
-        is_chang_sheng=bool(raw.get("is_chang_sheng") or raw.get("vongTrangSinh")),
-        is_auspicious=is_auspicious,
-        palace_position=raw.get("palace_position") or raw.get("saoViTriCung"),
+        id=star.legacy_id,
+        name=star.name,
+        element=star.element,
+        category=star.category,
+        category_label=(
+            STAR_CATEGORY_LABELS.get(star.category) if star.category is not None else None
+        ),
+        miao_wang=star.brightness,
+        miao_wang_label=(MIAO_WANG_LABELS.get(star.brightness) if star.brightness else None),
+        mutagen=star.mutagen,
+        is_auspicious=star.is_auspicious,
     )
-
-
-def palace_stems(year_stem: int) -> dict[int, int]:
-    """Stem of each palace via Five Tigers escape (Ngũ Hổ Độn)."""
-    stem_yin = _STEM_OF_YIN[year_stem]
-    result: dict[int, int] = {}
-    for i in range(1, 13):
-        offset = (i - 3 + 12) % 12
-        result[i] = ((stem_yin - 1 + offset) % 10) + 1
-    return result
 
 
 def yue_xian_map(
@@ -240,47 +200,44 @@ class TuViService:
     @staticmethod
     def _build_chart_meta(
         birth: BirthInfoRequest,
-        lunar_day: int,
-        lunar_month: int,
-        lunar_year: int,
-        plate: EarthPlate,
+        chart: CanonicalChart,
         year_stem: int,
         year_branch: int,
         view_year: Optional[int],
     ) -> ChartMeta:
-        if birth.is_solar:
-            d, m, y = birth.day, birth.month, birth.year
-        else:
-            solar = lunar_to_solar(lunar_day, lunar_month, lunar_year, 0, birth.timezone)
-            d, m, y = solar[0], solar[1], solar[2]
-
-        heaven = HeavenPlate(
-            d,
-            m,
-            y,
-            birth.hour,
-            birth.gender,
-            birth.name or "",
-            plate,
-            is_solar=True,
-            timezone=birth.timezone,
-        )
-
         view_year_branch = None
         if view_year is not None:
             chi = ((view_year - 4) % 12) + 1
             view_year_branch = EARTHLY_BRANCHES[chi]["branch_name"]
 
+        nayin = nayin_element(year_branch, year_stem)
+        ben_ming_name = nayin_element(year_branch, year_stem, True)
+        ben_ming_element_id = five_element(nayin)["id"]
+        bureau_element_id = {2: 3, 3: 2, 4: 1, 5: 5, 6: 4}[chart.five_elements_class]
+        relation = generation_control(ben_ming_element_id, bureau_element_id)
+        relation_labels = {
+            1: "Bản Mệnh sinh Cục",
+            -1: "Bản Mệnh khắc Cục",
+            -1j: "Cục khắc Bản Mệnh",
+            1j: "Cục sinh Bản mệnh",
+            0: "Cục hòa Bản Mệnh",
+        }
+
+        life_yin_yang = chart.palace(chart.life_palace_index).yin_yang
+        life_yin_yang_status = (
+            "Âm dương thuận lý" if life_yin_yang * birth.gender == 1 else "Âm dương nghịch lý"
+        )
+
         return ChartMeta(
-            ben_ming_name=getattr(heaven, "ben_ming_name", None),
-            nayin=getattr(heaven, "nayin", None),
-            year_yin_yang=getattr(heaven, "year_stem_yin_yang", None),
-            life_yin_yang_status=getattr(heaven, "life_yin_yang_status", None),
-            ming_zhu=EARTHLY_BRANCHES[plate.life_palace]["ming_zhu"],
-            shen_zhu=EARTHLY_BRANCHES[year_branch]["shen_zhu"],
-            sheng_ke_status=getattr(heaven, "sheng_ke_status", None),
-            wu_xing_ju_name=getattr(heaven, "wu_xing_ju_name", None),
-            wu_xing_ju=five_element(find_wu_xing_ju(plate.life_palace, year_stem))["wu_xing_ju"],
+            ben_ming_name=ben_ming_name,
+            nayin=nayin,
+            year_yin_yang="Dương" if year_branch % 2 == 1 else "Âm",
+            life_yin_yang_status=life_yin_yang_status,
+            ming_zhu=chart.soul_master or EARTHLY_BRANCHES[chart.life_palace_index]["ming_zhu"],
+            shen_zhu=chart.body_master or EARTHLY_BRANCHES[year_branch]["shen_zhu"],
+            sheng_ke_status=relation_labels[relation],
+            wu_xing_ju_name=chart.five_elements_class_name,
+            wu_xing_ju=chart.five_elements_class,
             view_year=view_year,
             view_year_branch=view_year_branch,
         )
@@ -288,81 +245,80 @@ class TuViService:
     @staticmethod
     def create_earth_plate(birth: BirthInfoRequest) -> EarthPlateResponse:
         lunar_day, lunar_month, lunar_year, _ = TuViService._resolve_lunar(birth)
-
-        plate = build_earth_plate(
+        chart = build_canonical_chart(
             birth.day,
             birth.month,
             birth.year,
             birth.hour,
             birth.gender,
-            birth.is_solar,
-            birth.timezone,
+            is_solar=birth.is_solar,
+            lunar_birth_month=lunar_month,
         )
 
-        month_stem, year_stem, year_branch = month_year_stem_branch(
+        _, year_stem, year_branch = month_year_stem_branch(
             lunar_day, lunar_month, lunar_year, False, birth.timezone
         )
-        stems = palace_stems(year_stem)
 
         view_year = birth.view_year or date.today().year
         view_branch = ((view_year - 4) % 12) + 1
         view_branch_name = EARTHLY_BRANCHES[view_branch]["branch_name"]
 
-        xiao_xian_palace = plate.life_palace
-        for i in range(1, 13):
-            if getattr(plate.palaces[i], "xiao_xian_branch", None) == view_branch_name:
-                xiao_xian_palace = i
+        xiao_xian_palace = chart.life_palace_index
+        for palace in chart.palaces:
+            if palace.xiao_xian_branch == view_branch_name:
+                xiao_xian_palace = palace.index
                 break
 
         month_map = yue_xian_map(xiao_xian_palace, lunar_month, birth.hour)
+        chart_meta = TuViService._build_chart_meta(birth, chart, year_stem, year_branch, view_year)
 
-        analyzer = ChartAnalyzer(plate)
+        year_stem_name = HEAVENLY_STEMS[year_stem]["stem_name"]
+        year_branch_name = EARTHLY_BRANCHES[year_branch]["branch_name"]
+
+        analyzer = ChartAnalyzer(
+            chart,
+            year_stem=year_stem_name,
+            year_branch=year_branch_name,
+            life_element=chart_meta.ben_ming_name,
+            destiny_element=chart_meta.wu_xing_ju_name,
+        )
         formations = [ChartFormation(**f) for f in analyzer.detect_formations()]
         palace_readings = analyzer.interpret_all_palaces()
+        taboo_palaces = analyzer.get_taboo_palaces()
 
         palaces: list[PalaceInfo] = []
-        for i in range(1, 13):
-            palace = plate.palaces[i]
-            raw_stars = getattr(palace, "stars", []) or []
-            stars = [_normalize_star(s if isinstance(s, dict) else s.__dict__) for s in raw_stars]
-            stem = stems[i]
-            palace_name = getattr(palace, "palace_name", None)
-            readings = palace_readings.get(palace_name or "", [])
+        for palace in chart.palaces:
+            readings = palace_readings.get(palace.name, [])
             palaces.append(
                 PalaceInfo(
                     index=palace.index,
                     branch_name=palace.branch_name,
-                    palace_name=palace_name,
-                    palace_element=palace.palace_element,
+                    palace_name=palace.name,
+                    palace_element=palace.branch_element,
                     yin_yang=palace.yin_yang,
-                    stem=stem,
-                    stem_name=HEAVENLY_STEMS[stem]["stem_name"],
-                    stars=stars,
+                    stem=palace.stem,
+                    stem_name=palace.stem_name,
+                    stars=[_star_to_api(star) for star in palace.stars],
                     interpretations=[StarInterpretation(**r) for r in readings],
-                    da_xian_age=getattr(palace, "da_xian_age", None),
-                    xiao_xian_branch=getattr(palace, "xiao_xian_branch", None),
-                    yue_xian=month_map.get(i),
-                    is_body_palace=bool(getattr(palace, "is_body_palace", False)),
-                    is_xun=bool(getattr(palace, "is_xun", False)),
-                    is_triet=bool(getattr(palace, "is_triet", False)),
+                    da_xian_age=palace.da_xian_age,
+                    xiao_xian_branch=palace.xiao_xian_branch,
+                    yue_xian=month_map.get(palace.index),
+                    is_body_palace=palace.is_body_palace,
+                    is_xun=palace.is_xun,
+                    is_triet=palace.is_triet,
                 )
             )
 
-        wu_xing_ju_key = find_wu_xing_ju(plate.life_palace, year_stem)
-        wu_xing_ju_data = five_element(wu_xing_ju_key)
-        chart_meta = TuViService._build_chart_meta(
-            birth, lunar_day, lunar_month, lunar_year, plate, year_stem, year_branch, view_year
-        )
-
         return EarthPlateResponse(
-            lunar_birth_month=plate.lunar_birth_month,
-            lunar_birth_hour=plate.lunar_birth_hour,
-            life_palace=plate.life_palace,
-            body_palace=plate.body_palace,
-            wu_xing_ju=wu_xing_ju_data["wu_xing_ju"],
-            wu_xing_ju_name=wu_xing_ju_data["wu_xing_ju_name"],
+            lunar_birth_month=chart.lunar_birth_month,
+            lunar_birth_hour=chart.lunar_birth_hour,
+            life_palace=chart.life_palace_index,
+            body_palace=chart.body_palace_index,
+            wu_xing_ju=chart.five_elements_class,
+            wu_xing_ju_name=chart.five_elements_class_name,
             palaces=palaces,
             formations=formations,
+            taboo_palaces=taboo_palaces,
             chart_meta=chart_meta,
         )
 

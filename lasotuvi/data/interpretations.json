@@ -19,37 +19,107 @@
     "empty_life_major_stars": {
       "name": "Vô Chính Diệu",
       "description": "Cung Mệnh không có chính tinh. Bản mệnh uyển chuyển, hay nương nhờ; cần mượn chính tinh cung xung chiếu để luận."
+    },
+    "emperor_ministers": {
+      "name": "Quân Thần Khánh Hội",
+      "description": "Tử Vi cư Mệnh đắc Tả Phụ, Hữu Bật. Như vua có bầy tôi đắc lực, sự nghiệp hanh thông, tài lãnh đạo xuất chúng."
+    },
+    "ji_yue_tong_liang_yin_shen": {
+      "name": "Cơ Nguyệt Đồng Lương (Dần Thân)",
+      "description": "Cơ Nguyệt Đồng Lương hội tụ tại Dần Thân. Phù hợp làm công chức, y tế, giáo dục. Cuộc sống an nhàn, có tính hoạch định cao."
+    },
+    "ju_ri_yin_shen": {
+      "name": "Cự Nhật Đồng Cung",
+      "description": "Cự Môn Thái Dương đồng cung tại Dần hoặc Thân. Tài ăn nói xuất chúng, dễ nổi danh nhưng nhiều cạnh tranh."
     }
   },
   "palaces": {
-    "Mệnh": {
-      "Tử vi": "Chủ khí chất đế vương, thích chỉ huy, trọng danh dự. Đắc địa: uy nghi, có người giúp. Hãm hoặc hội sát: cô độc, áp lực trách nhiệm.",
-      "Thiên phủ": "Ổn định, thủ tài, biết tích lũy. Hợp quản lý, hành chính. Ít liều lĩnh; cần tránh quá bảo thủ.",
-      "Vũ khúc": "Cương nghị, thực tế, giỏi tài chính / võ / kỹ thuật. Đắc địa: có của. Hội sát: tính nóng, dễ xung đột.",
-      "Thiên tướng": "Ấn tín, trung gian, hỗ trợ lãnh đạo. Tính ngay thẳng, hợp công chức, pháp lý, trợ lý cấp cao.",
-      "Thất sát": "Quả quyết, thích quyền lực hoặc môi trường cạnh tranh. Đắc địa: tướng tài. Hãm / nhiều sát: sóng gió sự nghiệp.",
-      "Phá quân": "Thích đổi mới, phá cách cũ. Cuộc đời nhiều biến động; hợp khởi nghiệp, cải tổ. Cần kỷ luật kẻo đổ vỡ.",
-      "Tham lang": "Ham học hỏi, đa tài, thích giao tế / đào hoa. Đắc địa: danh lợi. Hội sát dâm: tán tài, đa dục.",
-      "Thiên cơ": "Thông minh, đa mưu, hay suy nghĩ. Hợp nghiên cứu, kỹ thuật, tư vấn. Dễ lo âu, thay đổi ý.",
-      "Thái âm": "Ấm áp, trực giác, thích nghệ thuật / nội trợ / tài chính mềm. Nữ đắc địa tốt về hưởng thụ. Nam cần tránh ủy mị.",
-      "Thiên đồng": "Hòa đồng, phúc khí, thích an nhàn. Trẻ được cưng; lớn cần tự lập kẻo ỷ lại.",
-      "Thiên lương": "Trưởng thượng, che chở, thanh cao. Hợp y tế, giáo dục, tôn giáo, cố vấn.",
-      "Liêm trinh": "Cương trực, trọng khí tiết; cũng chủ đào hoa / hình ngục tùy hội sao. Đắc cát: thanh liêm. Hội sát: thị phi.",
-      "Thái Dương": "Quang minh, nhiệt tình, thích xuất đầu. Nam đắc địa tốt danh. Nữ / hãm địa: vất vả vì người khác.",
-      "Cự môn": "Miệng lưỡi, biện luận, nghiên cứu sâu. Đắc địa: luật sư, giảng dạy. Hãm: thị phi miệng tiếng."
+    "life_palace": {
+      "zi_wei": "Chủ khí chất đế vương, thích chỉ huy, trọng danh dự. Đắc địa: uy nghi, có người giúp. Hãm hoặc hội sát: cô độc, áp lực trách nhiệm.",
+      "tian_fu": "Ổn định, thủ tài, biết tích lũy. Hợp quản lý, hành chính. Ít liều lĩnh; cần tránh quá bảo thủ.",
+      "wu_qu": "Cương nghị, thực tế, giỏi tài chính / võ / kỹ thuật. Đắc địa: có của. Hội sát: tính nóng, dễ xung đột.",
+      "tian_xiang": "Ấn tín, trung gian, hỗ trợ lãnh đạo. Tính ngay thẳng, hợp công chức, pháp lý, trợ lý cấp cao.",
+      "qi_sha": "Quả quyết, thích quyền lực hoặc môi trường cạnh tranh. Đắc địa: tướng tài. Hãm / nhiều sát: sóng gió sự nghiệp.",
+      "po_jun": "Thích đổi mới, phá cách cũ. Cuộc đời nhiều biến động; hợp khởi nghiệp, cải tổ. Cần kỷ luật kẻo đổ vỡ.",
+      "tan_lang": "Ham học hỏi, đa tài, thích giao tế / đào hoa. Đắc địa: danh lợi. Hội sát dâm: tán tài, đa dục.",
+      "tian_ji": "Thông minh, đa mưu, hay suy nghĩ. Hợp nghiên cứu, kỹ thuật, tư vấn. Dễ lo âu, thay đổi ý.",
+      "tai_yin": "Ấm áp, trực giác, thích nghệ thuật / nội trợ / tài chính mềm. Nữ đắc địa tốt về hưởng thụ. Nam cần tránh ủy mị.",
+      "tian_tong": "Hòa đồng, phúc khí, thích an nhàn. Trẻ được cưng; lớn cần tự lập kẻo ỷ lại.",
+      "tian_liang": "Trưởng thượng, che chở, thanh cao. Hợp y tế, giáo dục, tôn giáo, cố vấn.",
+      "lian_zhen": "Cương trực, trọng khí tiết; cũng chủ đào hoa / hình ngục tùy hội sao. Đắc cát: thanh liêm. Hội sát: thị phi.",
+      "tai_yang": "Quang minh, nhiệt tình, thích xuất đầu. Nam đắc địa tốt danh. Nữ / hãm địa: vất vả vì người khác.",
+      "ju_men": "Miệng lưỡi, biện luận, nghiên cứu sâu. Đắc địa: luật sư, giảng dạy. Hãm: thị phi miệng tiếng."
     },
-    "Phu thê": {
-      "Tử vi": "Người phối ngẫu tính cương, có dục vọng thống trị; thiếu giao lưu tình cảm nếu không hội cát. Hội Không Kiếp Hỏa Linh: dễ bất hòa."
+    "spouse_palace": {
+      "zi_wei": "Người phối ngẫu tính cương, có dục vọng thống trị; thiếu giao lưu tình cảm nếu không hội cát. Hội Không Kiếp Hỏa Linh: dễ bất hòa."
     },
-    "Quan lộc": {
-      "Tử vi": "Sự nghiệp mang tính lãnh đạo, quản lý; thích vị trí cao. Cần uy tín và người phụ tá.",
-      "Thất sát": "Công danh cạnh tranh mạnh; hợp quân sự, phẫu thuật, khởi nghiệp rủi ro cao.",
-      "Vũ khúc": "Sự nghiệp gắn tiền bạc, kỹ thuật, võ / tài chính. Thực tế, ít hoa mỹ."
+    "career_palace": {
+      "zi_wei": "Sự nghiệp mang tính lãnh đạo, quản lý; thích vị trí cao. Cần uy tín và người phụ tá.",
+      "qi_sha": "Công danh cạnh tranh mạnh; hợp quân sự, phẫu thuật, khởi nghiệp rủi ro cao.",
+      "wu_qu": "Sự nghiệp gắn tiền bạc, kỹ thuật, võ / tài chính. Thực tế, ít hoa mỹ."
     },
-    "Tài Bạch": {
-      "Thiên phủ": "Biết giữ của, tài chính ổn định; hợp kế toán, quản lý quỹ.",
-      "Vũ khúc": "Kiếm tiền mạnh, thích kinh doanh thực tế; tránh đầu cơ quá tay khi hội sát.",
-      "Tham lang": "Tiền đến từ giao tế, đa ngành; dễ tiêu xài / đầu tư cảm tính."
+    "wealth_palace": {
+      "tian_fu": "Biết giữ của, tài chính ổn định; hợp kế toán, quản lý quỹ.",
+      "wu_qu": "Kiếm tiền mạnh, thích kinh doanh thực tế; tránh đầu cơ quá tay khi hội sát.",
+      "tan_lang": "Tiền đến từ giao tế, đa ngành; dễ tiêu xài / đầu tư cảm tính."
+    }
+  },
+  "star_metadata": {
+    "zi_wei": {
+      "classification": "quy_tinh",
+      "element": "tho"
+    },
+    "tian_ji": {
+      "classification": "tho_tinh",
+      "element": "moc"
+    },
+    "tai_yang": {
+      "classification": "quy_tinh",
+      "element": "hoa"
+    },
+    "wu_qu": {
+      "classification": "tai_tinh",
+      "element": "kim"
+    },
+    "tian_tong": {
+      "classification": "phuc_tinh",
+      "element": "thuy"
+    },
+    "lian_zhen": {
+      "classification": "hinh_tinh",
+      "element": "hoa"
+    },
+    "tian_fu": {
+      "classification": "tai_tinh",
+      "element": "tho"
+    },
+    "tai_yin": {
+      "classification": "tai_tinh",
+      "element": "thuy"
+    },
+    "tan_lang": {
+      "classification": "dam_tinh",
+      "element": "thuy"
+    },
+    "ju_men": {
+      "classification": "am_tinh",
+      "element": "thuy"
+    },
+    "tian_xiang": {
+      "classification": "quyen_tinh",
+      "element": "thuy"
+    },
+    "tian_liang": {
+      "classification": "tho_tinh",
+      "element": "tho"
+    },
+    "qi_sha": {
+      "classification": "quyen_tinh",
+      "element": "kim"
+    },
+    "po_jun": {
+      "classification": "hung_tinh",
+      "element": "thuy"
     }
   }
 }

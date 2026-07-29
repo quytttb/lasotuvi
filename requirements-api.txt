@@ -9,6 +9,9 @@ uvicorn[standard]>=0.32.0  # ASGI server with auto-reload
 pydantic>=2.10.0
 pydantic-settings>=2.7.0
 
+# Chart engine (kept here as API deployments install this file directly)
+py-iztro>=0.1.5,<0.2
+
 # HTTP client for testing
 httpx>=0.28.0
 
