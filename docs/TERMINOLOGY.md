@@ -192,7 +192,7 @@ Nhóm Bắc Đẩu / Nam Đẩu: xem [sǹg-miā glossary](https://sng-mia.com/en
 ## 9. Một số phụ tinh và sát tinh thường gặp
 
 | Hán Việt | 繁體 | English (gợi ý code / docs) |
-|---|---|---||
+|---|---|---|
 | Lộc tồn | 祿存 | Lu Cun (Wealth Store) |
 | Kình dương | 擎羊 | Qing Yang / Blade |
 | Đà la | 陀羅 | Tuo Luo / Spinner |
