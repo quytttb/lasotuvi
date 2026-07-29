@@ -19,11 +19,12 @@ Version: **2.0.0**
 ## Quick start
 
 ```bash
-python3.12 -m venv .venv
-source .venv/bin/activate
-pip install -e ".[api]"
+uv sync --locked --extra api
 ./run_api.sh
 ```
+
+Install [uv](https://docs.astral.sh/uv/) to use the reviewed dependency set in `uv.lock`.
+`pip install -e ".[api]"` remains available when a locked environment is not required.
 
 - Docs: http://localhost:8000/docs
 - Liveness: http://localhost:8000/health

@@ -28,10 +28,19 @@ Code naming (PEP 8 English): see [docs/NAMING.md](docs/NAMING.md).
 ## Quick start
 
 ```bash
-python3.12 -m venv .venv
-source .venv/bin/activate
-pip install -e ".[dev]"
+uv sync --locked --extra dev
 ```
+
+### Reproducible development environment
+
+The committed `uv.lock` is the reviewed dependency set used by CI. Install
+[uv](https://docs.astral.sh/uv/) to use the locked setup above. The legacy `pip install -e
+".[dev]"` command remains supported, but resolves the compatible versions available at install
+time rather than the reviewed lockfile.
+
+To intentionally update dependencies, run `uv lock --upgrade`, review the resulting lockfile,
+then run the test and audit checks. The CI workflow audits all locked dependency groups with
+`pip-audit`.
 
 ### API
 

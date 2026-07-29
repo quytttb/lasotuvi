@@ -13,5 +13,5 @@ black>=24.0.0
 # Type checking
 pyright>=1.1.380
 
-# API test client
-httpx>=0.28.0
+# API test client required by Starlette's TestClient
+httpx2>=2.0.0
